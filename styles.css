@@ -1,0 +1,382 @@
+@import url('https://fonts.googleapis.com/css2?family=Jaro:opsz@6..72&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+
+.alert-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 9999; /* Ensure it’s above other elements */
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #1b1b1b;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.crt-monitor {
+    position: relative; /* For positioning pseudo-elements */
+    width: 80vw; 
+    height: 60vw; 
+    max-width: 100vh; 
+    max-height: 75vh; 
+    background: #333; /* Restore original background */
+    border: 2vw solid #666;
+    border-image: url('metal.jpg') 30 round;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative; /* Ensure we can position pseudo-elements */
+    overflow: hidden;
+}
+
+.crt-monitor::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 255, 0, 0.05) 0px,
+        rgba(0, 255, 0, 0.05) 1px,
+        transparent 2px,
+        transparent 3px
+    );
+    opacity: 1;
+    mix-blend-mode:  
+    /* If desired, experiment with blend modes again:
+       mix-blend-mode: multiply; 
+    */
+}
+
+.crt-monitor::before {
+    content: "";
+    position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;
+    pointer-events: none;
+    z-index: 11; /* Above the scan lines which are at 10, so noise is over them */
+    background: url('noise.png') repeat;
+    opacity: 0.04; /* Low opacity for subtle effect */
+}
+
+.flicker-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    pointer-events: none;
+    z-index: 9;
+    opacity: 0;
+}
+
+.crt-screen {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 1) 60%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
+    box-shadow: inset 0 0 50px rgba(0, 255, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.crt-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 80%);
+    mix-blend-mode: overlay;
+    pointer-events: none;
+}
+
+.crt-screen::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0) 80%);
+    pointer-events: none;
+}
+
+.crt-text {
+    color: #0aff0a;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 2vw;
+    text-shadow: 0 0 5px #0aff0a;
+    text-align: center;
+    opacity: 1;
+    animation: fade-out 3s ease-in forwards;
+}
+.crt-text, 
+.typed-content {
+    text-shadow: 0 0 3px #0aff0a; /* Single, moderate glow */
+}
+
+
+@keyframes fade-out {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.dots span {
+    opacity: 0;
+    animation: blink-sequence 2s linear infinite;
+    animation-delay: var(--delay);
+}
+
+.dots {
+    animation: restart 5s linear infinite;
+}
+
+@keyframes blink-sequence {
+    0%, 40% { opacity: 0; }
+    50%, 90% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes restart {
+    0%, 98% { visibility: visible; }
+    99%, 100% { visibility: hidden; }
+}
+
+.menu {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 15px;
+    position: relative;
+    z-index: 10000;
+}
+
+
+.menu-item {
+    width: 150px;
+    height: 40px;
+    background-color: #333;
+    color: #0aff0a;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.8em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #666;
+    box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.5);
+    text-align: center;
+}
+
+.new-screen {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 1) 60%);
+    border-radius: 6px;
+    box-shadow: inset 0 0 50px rgba(0, 255, 0, 0.3);
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+    animation: fade-in 3s ease-in forwards;
+    transition: opacity 0.5s ease-in-out;
+    filter: contrast(1.2) brightness(1.5) saturate(1.2) blur(0.5px);
+}
+
+.new-screen.active {
+    opacity: 1;
+    animation: fade-in 3s ease-in forwards;
+    pointer-events: auto;
+}
+
+.new-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 80%);
+    mix-blend-mode: overlay;
+    pointer-events: none;
+}
+
+.new-screen::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0) 80%);
+    pointer-events: none;
+}
+
+.menu-item:hover {
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.9);
+    cursor: pointer;
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+.flicker {
+    animation: flicker 0.1s steps(5) 1;
+    box-shadow: inset 0 0 50px rgba(0, 255, 0, 0.5);
+}
+
+@keyframes flicker {
+    0% { opacity: 0.5; }
+    20% { opacity: 0; }
+    40% { opacity: 0.5; }
+    60% { opacity: 0; }
+    80% { opacity: 0.5; }
+    100% { opacity: 0; }
+}
+
+/* New Subtle Flicker for Random Occurrences */
+.random-flicker {
+    animation: subtle-flicker 0.5s ease-out;
+    box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.2);
+}
+
+@keyframes subtle-flicker {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+    100% { opacity: 0.3; }
+}
+
+.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.visible {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.content-container {
+    display: flex;
+    flex-direction: column;
+    margin-left: 20px;
+    margin-top: 20px;
+    /* No need for gap here if each .info-set handles spacing internally. */
+}
+
+.info-set {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* spacing between .info-row elements */
+    margin-top: 15px;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* space between the info-box and typed-content */
+}
+
+.info-box {
+    width: 150px;
+    border: 2px solid #0aff0a;
+    background-color: transparent;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.8em;
+    color: #0aff0a;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    padding: 5px;
+    text-align: center;
+    text-shadow: 0 0 2px #0aff0a; /* A softer glow than main text */
+}
+
+.typed-content {
+    color: white; 
+    font-family: Jaro, monospace;
+    font-size: x-large;
+    position: relative;
+}
+
+.cursor {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background-color: #0aff0a;
+    margin-left: 5px;
+    animation: blink 1s steps(2, start) infinite;
+    vertical-align: middle;
+    font-size: inherit;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+
+.alert-box {
+    background: linear-gradient(to bottom, #8b0000 0%, #4d0000 100%);
+    border: 2px solid #4d0000;
+    color: #ffffff;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9em;
+    text-align: center;
+    box-shadow: inset 0 0 20px rgba(255,0,0,0.5);
+    text-shadow: 0 0 5px #ff0000;
+    
+    width: 220px;            /* Slightly larger than info-box width (150px), for text wrapping */
+    padding: 10px;           /* Padding for spacing */
+    word-wrap: break-word;   /* Ensure long text wraps instead of overflowing */
+
+    opacity: 0;
+    transform: scale(0.95);
+    animation: alert-pop-in 0.5s ease forwards;
+}
+
+/* Keyframe to pop the alert in */
+@keyframes alert-pop-in {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.pong-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+}

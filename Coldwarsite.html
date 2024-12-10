@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRT Terminal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="crt-monitor">
+    <div class="flicker-container"></div>
+    <div class="crt-screen">
+        <p class="crt-text">
+            SYSTEM ONLINE
+            <span class="dots">
+                <span style="--delay: 0s;">.</span>
+                <span style="--delay: 0.5s;">.</span>
+                <span style="--delay: 1s;">.</span>
+            </span>
+        </p>
+    </div>
+
+    <div class="alert-container"></div>
+
+    <div class="new-screen">
+        <div class="menu">
+            <div class="menu-item">Information</div>
+            <div class="menu-item">Availability</div>
+            <div class="menu-item">Misc.</div>
+        </div>
+
+        <div class="content-container">
+            <!-- INFORMATION SET (default visible) -->
+            <div class="info-set info-set-information">
+                <div class="info-row">
+                    <div class="info-box">Name</div>
+                    <div class="typed-content name-content"></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-box">Birthday</div>
+                    <div class="typed-content birthday-content"></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-box">Likes</div>
+                    <div class="typed-content likes-content"></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-box">Dislikes</div>
+                    <div class="typed-content dislikes-content"></div>
+                </div>
+            </div>
+ <!-- MISC -->
+            <div class="info-set info-set-misc" style="display:none;">
+    <div class="info-row">
+        <div class="info-box">Fun Facts</div>
+        <div class="typed-content fun-facts-content"></div>
+    </div>
+    <div class="info-row">
+        <div class="info-box">What Inspired It</div>
+        <div class="typed-content inspired-content"></div>
+    </div>
+    <div class="info-row">
+        <div class="info-box">Suggestions</div>
+        <div class="typed-content suggestions-content"></div>
+    </div>
+</div>
+
+            <!-- AVAILABILITY SET (hidden by default) -->
+            <div class="info-set info-set-availability" style="display:none;">
+                <div class="info-row">
+                    <div class="info-box">Favorite People</div>
+                    <div class="typed-content favorite-people-content"></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-box">Free Times</div>
+                    <div class="typed-content notfree-content"></div>
+                </div>
+            </div>
+        </div>
+        <canvas class="pong-canvas"></canvas>
+    </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
