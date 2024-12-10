@@ -159,7 +159,7 @@ function showMisc() {
 
         // Animate typing for each box sequentially
         writeStringToElement(funFactsContent, 'I have died a couple of times and nearly a lot of other times, plus I have a sick setup.', () => {
-            writeStringToElement(inspiredContent, 'Inspired by cold war era tech and me wanting to make myself a bio. I also got inspired to make this by Sophie, so thank you', () => {
+            writeStringToElement(inspiredContent, 'Inspired by cold war era tech and me wanting to make myself a bio. I also got inspired to make this by Sophie :)', () => {
                 writeStringToElement(suggestionsContent, 'Text me about anything I might have missed :)', () => {
                     startAlerts();
                 });
