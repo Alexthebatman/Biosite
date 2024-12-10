@@ -175,9 +175,9 @@ function showMisc() {
         infoSetMisc.style.display = 'flex';
 
         // Animate typing for each box sequentially
-        writeStringToElement(funFactsContent, 'I love rocket science!', () => {
-            writeStringToElement(inspiredContent, 'Inspired by classic gaming consoles and vintage computer interfaces.', () => {
-                writeStringToElement(suggestionsContent, 'Feel free to reach out with any suggestions or feedback!', () => {
+        writeStringToElement(funFactsContent, 'I have died a couple of times and nearly a lot of other times, plus I have a sick setup.', () => {
+            writeStringToElement(inspiredContent, 'Inspired by cold war era tech and me wanting to make myself a bio. I also got inspired to make this by Sophie, so thank you', () => {
+                writeStringToElement(suggestionsContent, 'Text me about anything I might have missed :)', () => {
                     startAlerts();
                 });
             });
