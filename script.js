@@ -67,22 +67,11 @@ setTimeout(transitionScreens, 1000);
 // Activate flicker for transitions (Single Flicker)
 function activateTransitionFlicker(callback) {
     flickerContainer.classList.add('flicker');
-
-    // Listen for the end of the flicker animation
     flickerContainer.addEventListener('animationend', function handler() {
-        // Remove the event listener to prevent multiple triggers
         flickerContainer.removeEventListener('animationend', handler);
-
-        // Hide all info sets and clear their content
         hideAllInfoSets();
-
-        // Remove flicker class
         flickerContainer.classList.remove('flicker');
-
-        // Invoke the callback to show new content
         if (callback) callback();
-
-        // Reset the transitioning flag
         isTransitioning = false;
     });
 }
@@ -92,25 +81,22 @@ function activateRandomFlicker() {
     flickerContainer.classList.add('random-flicker');
     setTimeout(() => {
         flickerContainer.classList.remove('random-flicker');
-    }, 500); // Duration matches the .random-flicker animation duration
+    }, 500);
 }
 
 // Random flicker function
 function randomFlicker() {
-    // Adjust probability and timing to make it gentler
-    if (Math.random() < 0.01) { // 1% chance every interval
+    if (Math.random() < 0.01) {
         activateRandomFlicker();
     }
 }
-setInterval(randomFlicker, 3000); // Every 3 seconds
+setInterval(randomFlicker, 3000);
 
 // Write string to element with proper clearing
 function writeStringToElement(element, text, callback) {
-    // If this element is already being typed, cancel the existing interval
     if (currentTypingElement && currentTypingElement.element === element) {
         clearInterval(currentTypingElement.interval);
     } else if (currentTypingElement) {
-        // If a different element is being typed, cancel its interval
         clearInterval(currentTypingElement.interval);
         currentTypingElement = null;
     }
@@ -127,21 +113,18 @@ function writeStringToElement(element, text, callback) {
 
     const timer = setInterval(() => {
         if (i < charArray.length) {
-            // Append the next character
             element.textContent = element.textContent.slice(0, -1) + charArray[i];
             element.appendChild(cursor);
             i++;
         } else {
-            // Typing complete
             clearInterval(timer);
-            element.textContent = text; // Set the full text directly
+            element.textContent = text;
             cursor.remove();
             currentTypingElement = null;
             if (callback) callback();
         }
-    }, 50); // Typing interval
+    }, 50);
 
-    // Update the currentTypingElement to track this typing animation
     currentTypingElement = { element, interval: timer };
 }
 
@@ -188,11 +171,11 @@ function showMisc() {
 // Update the event listener for menu buttons
 buttons.forEach((button) => {
     button.addEventListener('click', (event) => {
-        if (isTransitioning) return; // Prevent multiple rapid clicks
-        isTransitioning = true; // Set the flag to indicate a transition is in progress
+        if (isTransitioning) return;
+        isTransitioning = true;
 
         userInteracted = true;
-        stopPongWithFade(); // Immediately start fade
+        stopPongWithFade();
 
         const buttonText = event.target.textContent.trim();
 
@@ -275,7 +258,7 @@ let loseStartTime = null;
 
 // Initialize Pong Game
 function initPongGame() {
-    if (userInteracted) return; // If user interacted, don't start another game
+    if (userInteracted) return;
 
     // Initialize ball with random velocity
     const vx = (Math.random() * 0.8 + 0.7) * (Math.random() < 0.5 ? 1 : -1); // 0.7 to 1.5 speed, random direction
@@ -372,7 +355,6 @@ function drawEndScreen() {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
-    // Determine the winner based on where the ball exited
     const winnerText = ball.x < 0 ? "RIGHT PLAYER WINS" : "LEFT PLAYER WINS";
     ctx.fillText(winnerText, canvas.width / 2, canvas.height / 2);
 
@@ -430,10 +412,8 @@ function stopPongWithFade() {
     }, 500);
 }
 
-// Ensure all info sets are hidden and cleared on initial load
 document.addEventListener('DOMContentLoaded', () => {
-    hideAllInfoSets(); // Hides all info sets, including Misc
+    hideAllInfoSets();
 });
 
-// Initialize Pong Game
 initPongGame();
