@@ -132,7 +132,7 @@ function writeStringToElement(element, text, callback) {
 function showInformation() {
     infoSetInformation.style.display = 'flex';
     writeStringToElement(nameContent, 'Alex | rocket_point', () => {
-        writeStringToElement(birthdayContent, 'October 27th, 2003', () => {
+        writeStringToElement(birthdayContent, 'October 27th, 2003 | 21 & Male', () => {
             writeStringToElement(likesContent, 'Rockets, Typing, Gaming, Daves', () => {
                 writeStringToElement(dislikesContent, 'Assholes, Bolt tearing up my lego box, college (help)', () => {
                     startAlerts();
