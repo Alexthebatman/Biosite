@@ -145,7 +145,7 @@ function showInformation() {
 // Show Availability set
 function showAvailability() {
     infoSetAvailability.style.display = 'flex';
-    writeStringToElement(favoritePeopleContent, 'Emmi, Reki, Rune, Jazzy; If I talk to you a lot, you are included', () => {
+    writeStringToElement(favoritePeopleContent, 'Emmi, Rune; If I talk to you a lot, you are included', () => {
         writeStringToElement(notFreeContent, '6 PM - 12 AM on Weekdays | 10 AM - 3 AM on Weekends\n; Favorite people can text any time!', () => {
             startAlerts();
         });
