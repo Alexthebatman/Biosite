@@ -297,11 +297,13 @@ body {
     margin-top: 20px;
 }
 
-/* ASCII ART STYLE */
-.ascii-art {
+.ascii-art{
+  font-family: "Roboto Mono", "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0;
   white-space: pre;
-  overflow-x: auto;
-  max-width: 100%;
+  margin: 0;
 }
 
 .info-set {
@@ -460,5 +462,6 @@ body {
     color: #0aff0a;
     text-shadow: 0 0 5px #0aff0a;
 }
+
 
 
