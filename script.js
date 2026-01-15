@@ -744,6 +744,16 @@ if (backToPongBtn) {
   });
 }
 
+if (backToPongBtn) {
+  console.log('Back button found!');
+  backToPongBtn.addEventListener('click', (e) => {
+    console.log('Back button clicked!');
+    e.stopPropagation();  // Prevent event bubbling
+    showBackButton(false);
+    showHomePong();
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   hideAllInfoSets();
   setAsciiVisible(false);
@@ -752,6 +762,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
+
 
 
 
