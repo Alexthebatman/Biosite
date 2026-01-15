@@ -295,28 +295,13 @@ body {
     flex-direction: column;
     margin-left: 20px;
     margin-top: 20px;
-    position: relative;
-    z-index: 5;
 }
 
-/* ===== ASCII ART STYLING ===== */
+/* ASCII ART STYLE */
 .ascii-art {
-    white-space: pre;
-    overflow-x: auto;
-    max-width: 100%;
-    /* Make it visible with CRT green color */
-    color: #0aff0a;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: clamp(0.4rem, 1.2vw, 0.9rem);
-    line-height: 1.1;
-    margin: 0 0 20px 0;
-    /* CRT glow effect */
-    text-shadow: 
-        0 0 5px #0aff0a,
-        2px 0 0px rgba(255, 0, 0, 0.3),
-        -2px 0 0px rgba(0, 0, 255, 0.3);
-    /* Prevent text selection messing with layout */
-    user-select: none;
+  white-space: pre;
+  overflow-x: auto;
+  max-width: 100%;
 }
 
 .info-set {
@@ -387,7 +372,7 @@ body {
 }
 
 /* Alert Fade out animation */
-.alert-fade-out {
+.alert-fade {
     animation: alert-pop-out 1s ease forwards !important;
 }
 
@@ -475,3 +460,5 @@ body {
     color: #0aff0a;
     text-shadow: 0 0 5px #0aff0a;
 }
+
+
