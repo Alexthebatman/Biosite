@@ -19,6 +19,8 @@ const infoSetInformation = document.querySelector('.info-set-information');
 const infoSetAvailability = document.querySelector('.info-set-availability');
 const infoSetMisc = document.querySelector('.info-set-misc');
 
+const pongScoreboard = document.querySelector('.pong-scoreboard');
+
 const infoSets = document.querySelectorAll('.info-set');
 
 let userInteracted = false;
@@ -49,6 +51,7 @@ function transitionScreens() {
     setTimeout(() => {
         systemOnline.style.display = 'none';
         newScreen.classList.add('active');
+        document.querySelector('.control-panel')?.classList.add('visible');
     }, 3000);
 }
 setTimeout(transitionScreens, 1000);
@@ -154,6 +157,7 @@ buttons.forEach((button) => {
 
         userInteracted = true;
         stopPongWithFade();
+        if (pongScoreboard) pongScoreboard.classList.add('hidden-ui');
 
         const buttonText = event.target.textContent.trim();
 
@@ -223,298 +227,246 @@ function startAlerts() {
     }
 }
 
+// Pong screensaver + scoreboard
 const canvas = document.querySelector('.pong-canvas');
 const ctx = canvas.getContext('2d');
 
+const UI_BOTTOM_GUARD = 120;
+
 let gameOver = false;
 let pongAnimationId = null;
+
 let ball, leftPaddle, rightPaddle;
 let forcedLose = false;
 let forcedLoseTimeout = null;
 let loseStartTime = null;
 
+let scoreLeft = 0;
+let scoreRight = 0;
+
+let lastFrameTime = performance.now();
+
 function rand(min, max) {
-  return Math.random() * (max - min) + min;
+    return Math.random() * (max - min) + min;
 }
 
 function clamp(v, min, max) {
-  return Math.max(min, Math.min(max, v));
+    return Math.max(min, Math.min(max, v));
+}
+
+function getCanvasCSSSize() {
+    const r = canvas.getBoundingClientRect();
+    return { w: r.width, h: Math.max(0, r.height - UI_BOTTOM_GUARD) };
 }
 
 function resizeCanvasToCSS() {
-  const rect = canvas.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = Math.floor(rect.width * dpr);
-  canvas.height = Math.floor(rect.height * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const r = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.floor(r.width * dpr);
+    canvas.height = Math.floor(r.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
-
-window.addEventListener('resize', () => {
-  if (!canvas || canvas.style.display === 'none') return;
-  resizeCanvasToCSS();
-});
 
 function initPongGame() {
-  if (userInteracted) return;
+    if (userInteracted) return;
 
-  canvas.style.display = 'block';
-  canvas.style.opacity = '1';
+    canvas.style.display = 'block';
+    canvas.style.opacity = '1';
 
-  resizeCanvasToCSS();
+    resizeCanvasToCSS();
 
-  const w = canvas.getBoundingClientRect().width;
-  const h = canvas.getBoundingClientRect().height;
+    if (pongScoreboard) pongScoreboard.classList.remove('hidden-ui');
 
-  const initialSpeed = rand(3.5, 5.0);
-  const angle = rand(-0.6, 0.6);
-  const dir = Math.random() < 0.5 ? -1 : 1;
+    const { w } = getCanvasCSSSize();
 
-  ball = {
-    x: w / 2,
-    y: rand(h * 0.3, h * 0.7),
-    vx: Math.cos(angle) * initialSpeed * dir,
-    vy: Math.sin(angle) * initialSpeed,
-    radius: 6,
-    speed: initialSpeed,
-    maxSpeed: 9.5
-  };
+    scoreLeft = 0;
+    scoreRight = 0;
 
-  // Randomized paddle properties for variety each game
-  leftPaddle = {
-    x: 24,
-    y: rand(h * 0.1, h * 0.7),
-    w: 12,
-    h: 90,
-    speed: rand(3.2, 4.2),           // Constant speed, randomized per game
-    direction: 0,                     // -1 up, 0 idle, 1 down
-    reactionOffset: rand(-15, 15),    // Where it "aims" relative to ball
-    deadzone: rand(5, 20)             // How close before it stops
-  };
+    leftPaddle = { x: 20, y: 100 + Math.random() * 100, w: 10, h: 80 };
+    rightPaddle = { x: w - 20 - 10, y: 100 + Math.random() * 100, w: 10, h: 80 };
 
-  rightPaddle = {
-    x: w - 24 - 12,
-    y: rand(h * 0.1, h * 0.7),
-    w: 12,
-    h: 90,
-    speed: rand(3.2, 4.2),
-    direction: 0,
-    reactionOffset: rand(-15, 15),
-    deadzone: rand(5, 20)
-  };
+    serveBall(Math.random() < 0.5 ? 1 : -1);
 
-  gameOver = false;
-  forcedLose = false;
-  loseStartTime = null;
+    gameOver = false;
+    forcedLose = false;
+    loseStartTime = null;
 
-  const forcedLoseTime = rand(10, 20) * 1000;
-  forcedLoseTimeout = setTimeout(() => {
-    if (!gameOver && !userInteracted) {
-      forcedLose = true;
-      loseStartTime = performance.now();
-    }
-  }, forcedLoseTime);
+    const forcedLoseTime = (Math.random() * 10 + 10) * 1000;
+    forcedLoseTimeout = setTimeout(() => {
+        if (!gameOver && !userInteracted) {
+            forcedLose = true;
+            loseStartTime = performance.now();
+        }
+    }, forcedLoseTime);
 
-  loop();
+    lastFrameTime = performance.now();
+    loop(lastFrameTime);
 }
 
-function movePaddles() {
-  const h = canvas.getBoundingClientRect().height;
+function serveBall(dir) {
+    const { w, h } = getCanvasCSSSize();
 
-  // Degrade one paddle's ability over time to force a loss
-  let leftSpeedMod = 1;
-  let rightSpeedMod = 1;
-  let leftDeadzoneMod = 0;
-  let rightDeadzoneMod = 0;
+    const baseSpeed = rand(1.4, 2.1);
+    const angle = rand(-0.35, 0.35);
 
-  if (forcedLose && loseStartTime) {
-    const elapsed = (performance.now() - loseStartTime) / 1000;
-    const degrade = clamp(elapsed / 4, 0, 1);
-    
-    // Pick which paddle to handicap based on ball direction
-    if (ball.vx < 0) {
-      leftSpeedMod = 1 - degrade * 0.5;
-      leftDeadzoneMod = degrade * 40;
-    } else {
-      rightSpeedMod = 1 - degrade * 0.5;
-      rightDeadzoneMod = degrade * 40;
+    ball = {
+        x: w / 2,
+        y: h / 2,
+        vx: Math.cos(angle) * baseSpeed * dir,
+        vy: Math.sin(angle) * baseSpeed,
+        radius: 5,
+        speed: baseSpeed,
+        maxSpeed: 3.4
+    };
+}
+
+function movePaddles(dt) {
+    const { h } = getCanvasCSSSize();
+
+    let paddleSpeed = 0.95;
+    let jitter = 7.5;
+    let reaction = 0.095;
+
+    if (forcedLose && loseStartTime) {
+        const elapsed = (performance.now() - loseStartTime) / 1000;
+        const degrade = clamp(elapsed / 5, 0, 1);
+        paddleSpeed = paddleSpeed - degrade * 0.5;
+        jitter = jitter + degrade * 12;
+        reaction = reaction - degrade * 0.04;
     }
-  }
 
-  // Move left paddle - classic Pong constant speed movement
-  const leftTarget = ball.y + leftPaddle.reactionOffset;
-  const leftCenter = leftPaddle.y + leftPaddle.h / 2;
-  const leftDiff = leftTarget - leftCenter;
-  const leftDeadzone = leftPaddle.deadzone + leftDeadzoneMod;
+    const leftAim = ball.y - leftPaddle.h / 2 + rand(-jitter, jitter);
+    const rightAim = ball.y - rightPaddle.h / 2 + rand(-jitter, jitter);
 
-  if (leftDiff > leftDeadzone) {
-    leftPaddle.direction = 1;
-  } else if (leftDiff < -leftDeadzone) {
-    leftPaddle.direction = -1;
-  } else {
-    leftPaddle.direction = 0;
-  }
+    const leftDelta = (leftAim - leftPaddle.y) * reaction;
+    const rightDelta = (rightAim - rightPaddle.y) * reaction;
 
-  leftPaddle.y += leftPaddle.direction * leftPaddle.speed * leftSpeedMod;
-  leftPaddle.y = clamp(leftPaddle.y, 0, h - leftPaddle.h);
+    const maxStep = paddleSpeed * dt;
+    leftPaddle.y += clamp(leftDelta, -maxStep, maxStep);
+    rightPaddle.y += clamp(rightDelta, -maxStep, maxStep);
 
-  // Move right paddle - same logic
-  const rightTarget = ball.y + rightPaddle.reactionOffset;
-  const rightCenter = rightPaddle.y + rightPaddle.h / 2;
-  const rightDiff = rightTarget - rightCenter;
-  const rightDeadzone = rightPaddle.deadzone + rightDeadzoneMod;
-
-  if (rightDiff > rightDeadzone) {
-    rightPaddle.direction = 1;
-  } else if (rightDiff < -rightDeadzone) {
-    rightPaddle.direction = -1;
-  } else {
-    rightPaddle.direction = 0;
-  }
-
-  rightPaddle.y += rightPaddle.direction * rightPaddle.speed * rightSpeedMod;
-  rightPaddle.y = clamp(rightPaddle.y, 0, h - rightPaddle.h);
+    leftPaddle.y = clamp(leftPaddle.y, 0, h - leftPaddle.h);
+    rightPaddle.y = clamp(rightPaddle.y, 0, h - rightPaddle.h);
 }
 
 function paddleBounce(paddle) {
-  const h = canvas.getBoundingClientRect().height;
+    const { h } = getCanvasCSSSize();
 
-  const hitPos = (ball.y - (paddle.y + paddle.h / 2)) / (paddle.h / 2);
-  const clampedHit = clamp(hitPos, -1, 1);
+    const hitPos = (ball.y - (paddle.y + paddle.h / 2)) / (paddle.h / 2);
+    const clampedHit = clamp(hitPos, -1, 1);
 
-  const maxBounce = 0.9;
-  const bounceAngle = clampedHit * maxBounce + rand(-0.08, 0.08);
+    const maxBounce = 0.85;
+    const bounceAngle = clampedHit * maxBounce + rand(-0.06, 0.06);
 
-  ball.speed = clamp(ball.speed + 0.25, 3, ball.maxSpeed);
+    ball.speed = clamp(ball.speed + 0.10, 1.2, ball.maxSpeed);
 
-  const dir = paddle === leftPaddle ? 1 : -1;
-  ball.vx = Math.cos(bounceAngle) * ball.speed * dir;
-  ball.vy = Math.sin(bounceAngle) * ball.speed;
+    const dir = paddle === leftPaddle ? 1 : -1;
+    ball.vx = Math.cos(bounceAngle) * ball.speed * dir;
+    ball.vy = Math.sin(bounceAngle) * ball.speed;
 
-  ball.vy += rand(-0.25, 0.25);
+    ball.vy += rand(-0.07, 0.07);
 
-  ball.y = clamp(ball.y, ball.radius, h - ball.radius);
-}
-
-function updateBall() {
-  const w = canvas.getBoundingClientRect().width;
-  const h = canvas.getBoundingClientRect().height;
-
-  ball.x += ball.vx;
-  ball.y += ball.vy;
-
-  if (ball.y - ball.radius <= 0 || ball.y + ball.radius >= h) {
-    ball.vy = -ball.vy;
     ball.y = clamp(ball.y, ball.radius, h - ball.radius);
-  }
-
-  if (
-    ball.vx < 0 &&
-    ball.x - ball.radius <= leftPaddle.x + leftPaddle.w &&
-    ball.y >= leftPaddle.y &&
-    ball.y <= leftPaddle.y + leftPaddle.h
-  ) {
-    ball.x = leftPaddle.x + leftPaddle.w + ball.radius;
-    paddleBounce(leftPaddle);
-  }
-
-  if (
-    ball.vx > 0 &&
-    ball.x + ball.radius >= rightPaddle.x &&
-    ball.y >= rightPaddle.y &&
-    ball.y <= rightPaddle.y + rightPaddle.h
-  ) {
-    ball.x = rightPaddle.x - ball.radius;
-    paddleBounce(rightPaddle);
-  }
-
-  if (ball.x + ball.radius < 0 || ball.x - ball.radius > w) endGame();
 }
 
-function endGame() {
-  gameOver = true;
-  clearTimeout(forcedLoseTimeout);
-  setTimeout(drawEndScreen, 350);
-}
+function updateBall(dt) {
+    const { w, h } = getCanvasCSSSize();
 
-function drawEndScreen() {
-  const w = canvas.getBoundingClientRect().width;
-  const h = canvas.getBoundingClientRect().height;
+    ball.x += ball.vx * dt;
+    ball.y += ball.vy * dt;
 
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0, 0, w, h);
+    if (ball.y - ball.radius <= 0 || ball.y + ball.radius >= h) {
+        ball.vy = -ball.vy;
+        ball.y = clamp(ball.y, ball.radius, h - ball.radius);
+    }
 
-  ctx.fillStyle = "#fff";
-  ctx.font = "20px Courier New";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
+    if (
+        ball.vx < 0 &&
+        ball.x - ball.radius <= leftPaddle.x + leftPaddle.w &&
+        ball.y >= leftPaddle.y &&
+        ball.y <= leftPaddle.y + leftPaddle.h
+    ) {
+        ball.x = leftPaddle.x + leftPaddle.w + ball.radius;
+        paddleBounce(leftPaddle);
+    }
 
-  const winnerText = (ball.x < w / 2) ? "RIGHT PLAYER WINS" : "LEFT PLAYER WINS";
-  ctx.fillText(winnerText, w / 2, h / 2);
+    if (
+        ball.vx > 0 &&
+        ball.x + ball.radius >= rightPaddle.x &&
+        ball.y >= rightPaddle.y &&
+        ball.y <= rightPaddle.y + rightPaddle.h
+    ) {
+        ball.x = rightPaddle.x - ball.radius;
+        paddleBounce(rightPaddle);
+    }
 
-  if (!userInteracted) {
-    setTimeout(() => {
-      if (!userInteracted) resetGame();
-    }, 2200);
-  }
-}
-
-function resetGame() {
-  if (userInteracted) return;
-  initPongGame();
+    if (ball.x + ball.radius < 0) {
+        scoreRight++;
+        serveBall(1);
+    } else if (ball.x - ball.radius > w) {
+        scoreLeft++;
+        serveBall(-1);
+    }
 }
 
 function draw() {
-  const w = canvas.getBoundingClientRect().width;
-  const h = canvas.getBoundingClientRect().height;
+    const { w, h } = getCanvasCSSSize();
 
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, w, h);
 
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(leftPaddle.x, leftPaddle.y, leftPaddle.w, leftPaddle.h);
-  ctx.fillRect(rightPaddle.x, rightPaddle.y, rightPaddle.w, rightPaddle.h);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(leftPaddle.x, leftPaddle.y, leftPaddle.w, leftPaddle.h);
+    ctx.fillRect(rightPaddle.x, rightPaddle.y, rightPaddle.w, rightPaddle.h);
 
-  ctx.beginPath();
-  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-  ctx.fill();
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fill();
 
-  ctx.fillStyle = "rgba(255,255,255,0.03)";
-  for (let i = 0; i < h; i += 2) ctx.fillRect(0, i, w, 1);
+    ctx.fillStyle = "rgba(255,255,255,0.03)";
+    for (let i = 0; i < h; i += 2) ctx.fillRect(0, i, w, 1);
+
+    if (pongScoreboard) {
+        pongScoreboard.textContent = `LEFT ${scoreLeft} : ${scoreRight} RIGHT`;
+    }
 }
 
-function loop() {
-  if (!gameOver) {
-    movePaddles();
-    updateBall();
+function loop(now) {
+    if (userInteracted || gameOver) return;
+
+    const dtMs = now - lastFrameTime;
+    lastFrameTime = now;
+
+    const dt = clamp(dtMs / 16.6667, 0.5, 1.5);
+
+    movePaddles(dt);
+    updateBall(dt);
     draw();
+
     pongAnimationId = requestAnimationFrame(loop);
-  }
 }
 
 function stopPongWithFade() {
-  userInteracted = true;
-  if (pongAnimationId) {
-    cancelAnimationFrame(pongAnimationId);
-    pongAnimationId = null;
-  }
-  canvas.style.transition = 'opacity 0.5s ease';
-  canvas.style.opacity = '0';
-  setTimeout(() => {
-    canvas.style.display = 'none';
-  }, 500);
-}
+    userInteracted = true;
 
+    if (pongAnimationId) {
+        cancelAnimationFrame(pongAnimationId);
+        pongAnimationId = null;
+    }
 
-function transitionScreens() {
-    systemOnline.style.opacity = '0';
-    systemOnline.style.transition = 'opacity 3s ease-in';
+    canvas.style.transition = 'opacity 0.5s ease';
+    canvas.style.opacity = '0';
     setTimeout(() => {
-        systemOnline.style.display = 'none';
-        newScreen.classList.add('active');
-        document.querySelector('.control-panel').classList.add('visible');
-    }, 3000);
+        canvas.style.display = 'none';
+    }, 500);
 }
 
+window.addEventListener('resize', () => {
+    if (!canvas || canvas.style.display === 'none' || userInteracted) return;
+    resizeCanvasToCSS();
+});
+
+// ASCII slant
 (function applyAsciiSlant() {
     const blocks = document.querySelectorAll("pre.ascii-art[data-slant]");
     blocks.forEach((pre) => {
@@ -533,6 +485,7 @@ function transitionScreens() {
     });
 })();
 
+// Date
 function setDate() {
     const dateDisplay = document.querySelector('.date-display');
     if (!dateDisplay) return;
@@ -551,5 +504,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
-
-
