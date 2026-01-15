@@ -640,6 +640,17 @@ function draw() {
   ctx.fillStyle = "rgba(255,255,255,0.03)";
   for (let i = 0; i < h; i += 2) ctx.fillRect(0, i, w, 1);
 
+  if (pointAnnounce && !matchOver) {
+  ctx.fillStyle = "rgba(0,0,0,0.55)";
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "22px Courier New";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(pointAnnounceText, w / 2, h / 2);
+}
+
   if (matchOver) {
     ctx.fillStyle = "rgba(0,0,0,0.85)";
     ctx.fillRect(0, 0, w, h);
@@ -659,6 +670,10 @@ function loop(now) {
   lastFrameTime = now;
 
   const dt = clamp(dtMs / 16.6667, 0.9, 1.1);
+
+  if (pointAnnounce && now >= pointAnnounceUntil) {
+  pointAnnounce = false;
+}
 
   if (!matchOver) {
     movePaddles(dt, now);
@@ -738,6 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
+
 
 
 
