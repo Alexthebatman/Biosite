@@ -60,6 +60,7 @@ function transitionScreens() {
     setTimeout(() => {
         systemOnline.style.display = 'none';
         newScreen.classList.add('active');
+        document.querySelector('.control-panel').classList.add('visible');
     }, 3000);
 }
 setTimeout(transitionScreens, 1000);
@@ -230,14 +231,14 @@ function showRandomAlert() {
 
     alertContainer.appendChild(alertBox);
 
-setTimeout(() => {
-    alertBox.classList.add('alert-fade-out'); // Add fade class
     setTimeout(() => {
-        if (alertBox.parentNode === alertContainer) {
-            alertContainer.removeChild(alertBox);
-        }
-    }, 1000); // Wait for fade animation to finish
-}, 6000);
+        alertBox.classList.add('alert-fade-out'); // Add fade class
+        setTimeout(() => {
+            if (alertBox.parentNode === alertContainer) {
+                alertContainer.removeChild(alertBox);
+            }
+        }, 1000); // Wait for fade animation to finish
+    }, 6000);
 }
 
 function startAlerts() {
@@ -415,43 +416,49 @@ function stopPongWithFade() {
     }, 500);
 }
 
-function transitionScreens() {
-    systemOnline.style.opacity = '0';
-    systemOnline.style.transition = 'opacity 3s ease-in';
-    
-    setTimeout(() => {
-        systemOnline.style.display = 'none';
-        newScreen.classList.add('active');
+// ===== ASCII ART SLANT FUNCTION =====
+// This creates a diagonal/italicized effect by adding progressive indentation to each line
+function applyAsciiSlant() {
+    const blocks = document.querySelectorAll("pre.ascii-art[data-slant]");
+
+    blocks.forEach((pre) => {
+        const slant = Math.max(0, parseInt(pre.dataset.slant || "0", 10));
+        if (!slant) return;
+
+        // Get the raw text content
+        const raw = pre.textContent.replace(/\t/g, "  ");
+        const lines = raw.split("\n");
+
+        // Filter out empty lines at start and end for cleaner output
+        let startIndex = 0;
+        let endIndex = lines.length - 1;
         
-        document.querySelector('.control-panel').classList.add('visible');
-    }, 3000);
+        while (startIndex < lines.length && lines[startIndex].trim() === '') {
+            startIndex++;
+        }
+        while (endIndex > startIndex && lines[endIndex].trim() === '') {
+            endIndex--;
+        }
+
+        const trimmedLines = lines.slice(startIndex, endIndex + 1);
+
+        // Apply progressive indentation - each line gets more spaces
+        const slanted = trimmedLines.map((line, i) => {
+            // Add (i * slant) spaces to the beginning of each line
+            return " ".repeat(i * slant) + line;
+        });
+
+        pre.textContent = slanted.join("\n");
+    });
 }
 
-(function applyAsciiSlant() {
-  const blocks = document.querySelectorAll("pre.ascii-art[data-slant]");
-
-  blocks.forEach((pre) => {
-    const slant = Math.max(0, parseInt(pre.dataset.slant || "0", 10));
-    if (!slant) return;
-
-    const raw = pre.textContent.replace(/\t/g, "  ");
-    const lines = raw.split("\n");
-
-    const slanted = lines.map((line, i) => {
-      if (line.trim().length === 0) return line;
-      return " ".repeat(i * slant) + line;
-    });
-
-    pre.textContent = slanted.join("\n");
-  });
-})();
-
+// ===== DOM READY INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', () => {
     hideAllInfoSets();
+    
+    // Apply ASCII slant after DOM is ready
+    applyAsciiSlant();
+    
+    // Initialize Pong game
+    initPongGame();
 });
-
-initPongGame();
-
-
-
-
