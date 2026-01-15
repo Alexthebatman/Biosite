@@ -352,16 +352,20 @@ body {
 
 
 .alert-box {
-    display: inline-block;
-    background: none;
-    border: none;
-    box-shadow: none;
-    width: auto;
-    padding: 5px 50px;
-    animation: ticker 15s linear infinite;
-    color: #ff4444;
-    text-transform: uppercase;
-    font-weight: bold;
+    background: linear-gradient(to bottom, #8b0000 0%, #4d0000 100%);
+    border: 2px solid #4d0000;
+    color: #ffffff;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9em;
+    text-align: center;
+    box-shadow: inset 0 0 20px rgba(255,0,0,0.5);
+    text-shadow: 0 0 5px #ff0000;
+    width: 220px;
+    padding: 10px;
+    word-wrap: break-word;
+    opacity: 0;
+    transform: scale(0.95);
+    animation: alert-pop-in 0.5s ease forwards;
 }
 
 @keyframes ticker {
@@ -448,6 +452,7 @@ body {
     color: #0aff0a;
     text-shadow: 0 0 5px #0aff0a;
 }
+
 
 
 
