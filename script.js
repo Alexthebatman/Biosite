@@ -23,6 +23,10 @@ const pongScoreboard = document.querySelector('.pong-scoreboard');
 const asciiArt = document.querySelector('.ascii-art');
 const infoSets = document.querySelectorAll('.info-set');
 
+const backToPongBtn = document.querySelector('.back-to-pong');
+const contentContainer = document.querySelector('.content-container');
+
+
 let userInteracted = false;
 let isTransitioning = false;
 let currentTypingElement = null;
@@ -46,6 +50,34 @@ function hideAllInfoSets() {
     clearInterval(currentTypingElement.interval);
     currentTypingElement = null;
   }
+}
+
+function showHomePong() {
+  // hide info sets + show pong again
+  hideAllInfoSets();
+  setAsciiVisible(false);
+
+  userInteracted = false;
+
+  // bring pong back
+  canvas.style.display = 'block';
+  canvas.style.opacity = '1';
+  canvas.style.pointerEvents = 'none';
+
+  // show scoreboard again
+  setScoreboardVisible(true);
+
+  // restart game fresh
+  initPongGame();
+
+  // keep button visible on home
+  if (backToPongBtn) backToPongBtn.classList.add('hidden');
+}
+
+function showBackButton(v) {
+  if (!backToPongBtn) return;
+  if (v) backToPongBtn.classList.remove('hidden');
+  else backToPongBtn.classList.add('hidden');
 }
 
 function transitionScreens() {
@@ -187,6 +219,7 @@ buttons.forEach((button) => {
 
     userInteracted = true;
     stopPongWithFade();
+    showBackButton(true);
     setScoreboardVisible(false);
 
     const buttonText = event.target.textContent.trim();
@@ -671,10 +704,20 @@ function setDate() {
 }
 setDate();
 
+if (backToPongBtn) {
+  backToPongBtn.addEventListener('click', () => {
+    // only makes sense after you left home
+    showBackButton(false);
+    showHomePong();
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   hideAllInfoSets();
   setAsciiVisible(false);
   setScoreboardVisible(true);
+  showBackButton(false);
 });
 
 initPongGame();
+
