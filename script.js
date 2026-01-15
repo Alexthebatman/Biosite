@@ -216,6 +216,8 @@ function showRandomAlert() {
     const alertContainer = document.querySelector('.alert-container');
     if (!alertContainer) return;
 
+    if (alertContainer.children.length > 0) return;
+
     if (currentAlertIndex >= shuffledMessages.length) {
         shuffledMessages = shuffleArray([...alertMessages]);
         currentAlertIndex = 0;
@@ -242,7 +244,7 @@ setTimeout(() => {
 
 function startAlerts() {
     if (!alertInterval) {
-        alertInterval = setInterval(showRandomAlert, 10000);
+        alertInterval = setInterval(showRandomAlert, 5000);
     }
 }
 
@@ -451,6 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
+
 
 
 
