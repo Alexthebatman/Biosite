@@ -466,7 +466,6 @@ window.addEventListener('resize', () => {
     resizeCanvasToCSS();
 });
 
-// ASCII slant
 (function applyAsciiSlant() {
     const blocks = document.querySelectorAll("pre.ascii-art[data-slant]");
     blocks.forEach((pre) => {
@@ -485,7 +484,6 @@ window.addEventListener('resize', () => {
     });
 })();
 
-// Date
 function setDate() {
     const dateDisplay = document.querySelector('.date-display');
     if (!dateDisplay) return;
@@ -504,3 +502,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
+
