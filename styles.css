@@ -299,12 +299,9 @@ body {
 
 /* ASCII ART STYLE */
 .ascii-art {
-    color: #0aff0a;
-    font-family: monospace;
-    font-size: 0.8vw;
-    line-height: 1.1;
-    margin: 0; /* GAP FIX: Removes default margin */
-    text-shadow: 0 0 5px #0aff0a;
+  white-space: pre;
+  overflow-x: auto;
+  max-width: 100%;
 }
 
 .info-set {
@@ -463,3 +460,4 @@ body {
     color: #0aff0a;
     text-shadow: 0 0 5px #0aff0a;
 }
+
