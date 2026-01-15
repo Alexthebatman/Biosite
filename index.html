@@ -8,7 +8,13 @@
 </head>
 <body>
 <div class="crt-monitor">
+    <div class="control-panel">
+        <div class="metal-button active" onclick="selectTab('info')">INFO</div>
+        <div class="metal-button" onclick="selectTab('avail')">AVAIL</div>
+        <div class="metal-button" onclick="selectTab('misc')">MISC</div>
+    </div>
     <div class="flicker-container"></div>
+    <div class="menu">
     <div class="crt-screen">
         <p class="crt-text">
             SYSTEM ONLINE
@@ -23,7 +29,6 @@
     <div class="alert-container"></div>
 
     <div class="new-screen">
-        <div class="menu">
             <div class="menu-item">Information</div>
             <div class="menu-item">Availability</div>
             <div class="menu-item">Misc.</div>
@@ -83,3 +88,4 @@
 <script src="script.js"></script>
 </body>
 </html>
+
