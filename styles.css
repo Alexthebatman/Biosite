@@ -355,7 +355,7 @@ body {
 
 .alert-box {
     display: inline-block;
-    background: none; /* Remove the heavy box look */
+    background: none;
     border: none;
     box-shadow: none;
     width: auto;
@@ -364,6 +364,11 @@ body {
     color: #ff4444;
     text-transform: uppercase;
     font-weight: bold;
+}
+
+@keyframes ticker {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
 }
 
 @keyframes alert-pop-in {
@@ -445,6 +450,7 @@ body {
     color: #0aff0a;
     text-shadow: 0 0 5px #0aff0a;
 }
+
 
 
 
