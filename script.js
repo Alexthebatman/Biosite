@@ -239,7 +239,7 @@ setTimeout(() => {
             alertContainer.removeChild(alertBox);
         }
     }, 1000); // Wait for fade animation to finish
-}, 6000);
+}, 4000);
 }
 
 function startAlerts() {
@@ -466,6 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
+
 
 
 
