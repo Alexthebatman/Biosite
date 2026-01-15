@@ -412,9 +412,22 @@ function stopPongWithFade() {
     }, 500);
 }
 
+function transitionScreens() {
+    systemOnline.style.opacity = '0';
+    systemOnline.style.transition = 'opacity 3s ease-in';
+    
+    setTimeout(() => {
+        systemOnline.style.display = 'none';
+        newScreen.classList.add('active');
+        
+        document.querySelector('.control-panel').classList.add('visible');
+    }, 3000);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     hideAllInfoSets();
 });
 
 initPongGame();
+
 
