@@ -20,11 +20,17 @@ const infoSetAvailability = document.querySelector('.info-set-availability');
 const infoSetMisc = document.querySelector('.info-set-misc');
 
 const pongScoreboard = document.querySelector('.pong-scoreboard');
+const asciiArt = document.querySelector('.ascii-art');
 const infoSets = document.querySelectorAll('.info-set');
 
 let userInteracted = false;
 let isTransitioning = false;
 let currentTypingElement = null;
+
+function setAsciiVisible(v) {
+  if (!asciiArt) return;
+  asciiArt.style.display = v ? 'block' : 'none';
+}
 
 function hideAllInfoSets() {
   infoSets.forEach(set => (set.style.display = 'none'));
@@ -112,6 +118,7 @@ function writeStringToElement(element, text, callback) {
 }
 
 function showInformation() {
+  setAsciiVisible(true);
   infoSetInformation.style.display = 'flex';
   writeStringToElement(nameContent, 'Alex | rocket_point', () => {
     writeStringToElement(birthdayContent, 'October 27th, 2003 | 22 & Male', () => {
@@ -125,6 +132,7 @@ function showInformation() {
 }
 
 function showAvailability() {
+  setAsciiVisible(true);
   infoSetAvailability.style.display = 'flex';
   writeStringToElement(
     favoritePeopleContent,
@@ -141,6 +149,7 @@ function showAvailability() {
 
 function showMisc() {
   if (!infoSetMisc) return;
+  setAsciiVisible(true);
   infoSetMisc.style.display = 'flex';
   writeStringToElement(
     funFactsContent,
@@ -290,7 +299,6 @@ function predictYAtX(targetX) {
   const span = bottom - top;
 
   let y = ball.y + ball.vy * t;
-
   if (span <= 0) return clamp(y, top, bottom);
 
   let m = (y - top) % (2 * span);
@@ -333,8 +341,29 @@ function initPongGame() {
   setScoreboardVisible(true);
   updateScoreboardText();
 
-  leftPaddle = { x: 20, y: 100 + Math.random() * 100, w: 10, h: 80, vy: rand(-1, 1), phase: rand(0, Math.PI * 2) };
-  rightPaddle = { x: w - 20 - 10, y: 100 + Math.random() * 100, w: 10, h: 80, vy: rand(-1, 1), phase: rand(0, Math.PI * 2) };
+  leftPaddle = {
+    x: 20,
+    y: 100 + Math.random() * 100,
+    w: 10,
+    h: 80,
+    vy: rand(-0.6, 0.6),
+    phase: rand(0, Math.PI * 2),
+    targetY: h / 2,
+    bias: rand(-6, 6),
+    nextRetargetAt: 0
+  };
+
+  rightPaddle = {
+    x: w - 20 - 10,
+    y: 100 + Math.random() * 100,
+    w: 10,
+    h: 80,
+    vy: rand(-0.6, 0.6),
+    phase: rand(0, Math.PI * 2),
+    targetY: h / 2,
+    bias: rand(-6, 6),
+    nextRetargetAt: 0
+  };
 
   serveBall(Math.random() < 0.5 ? 1 : -1);
 
@@ -356,8 +385,8 @@ function initPongGame() {
 function serveBall(dir) {
   const { w, h } = getCanvasCSSSize();
 
-  const baseSpeed = rand(3.2, 4.0);
-  const angle = rand(-0.35, 0.35);
+  const baseSpeed = rand(3.6, 4.4);
+  const angle = rand(-0.32, 0.32);
 
   ball = {
     x: w / 2,
@@ -366,7 +395,7 @@ function serveBall(dir) {
     vy: Math.sin(angle) * baseSpeed,
     radius: 5,
     speed: baseSpeed,
-    maxSpeed: 6.1
+    maxSpeed: 6.3
   };
 }
 
@@ -374,13 +403,10 @@ function endMatch(winner) {
   matchOver = true;
   matchWinnerText = winner === 'left' ? 'Left side wins' : 'Right side wins';
   matchOverUntil = performance.now() + 2200;
-
   clearTimeout(forcedLoseTimeout);
 }
 
 function resetMatch() {
-  const { w } = getCanvasCSSSize();
-
   scoreLeft = 0;
   scoreRight = 0;
   updateScoreboardText();
@@ -388,8 +414,12 @@ function resetMatch() {
   matchOver = false;
   matchWinnerText = '';
 
-  leftPaddle.vy = rand(-1, 1);
-  rightPaddle.vy = rand(-1, 1);
+  const { h } = getCanvasCSSSize();
+  leftPaddle.targetY = h / 2 - leftPaddle.h / 2;
+  rightPaddle.targetY = h / 2 - rightPaddle.h / 2;
+
+  leftPaddle.vy = rand(-0.4, 0.4);
+  rightPaddle.vy = rand(-0.4, 0.4);
 
   serveBall(Math.random() < 0.5 ? 1 : -1);
 
@@ -405,54 +435,67 @@ function resetMatch() {
   }, forcedLoseTime);
 }
 
-function moveOnePaddle(p, isLeft, dt, now) {
+function retargetPaddle(p, isLeft, now) {
   const { h } = getCanvasCSSSize();
 
   const ballComing = isLeft ? ball.vx < 0 : ball.vx > 0;
 
-  let maxSpeed = ballComing ? 10.0 : 6.5;
-  let accel = ballComing ? 2.4 : 1.6;
-  let damping = ballComing ? 0.88 : 0.82;
-
-  let aimError = ballComing ? 10 : 18;
-  let idleAmp = 26;
-  let idleFreq = 1.2;
-  let twitchChance = 0.010;
+  let aimError = ballComing ? 10 : 16;
+  let idleAmp = 22;
+  let idleFreq = 1.05;
 
   if (forcedLose && loseStartTime) {
     const elapsed = (performance.now() - loseStartTime) / 1000;
     const degrade = clamp(elapsed / 5, 0, 1);
-    maxSpeed = maxSpeed - degrade * 5.0;
-    accel = accel - degrade * 1.2;
-    aimError = aimError + degrade * 28;
-    idleAmp = idleAmp + degrade * 18;
+    aimError += degrade * 26;
+    idleAmp += degrade * 14;
   }
 
-  let targetY;
+  const drift = rand(-1.2, 1.2);
+  p.bias = clamp(p.bias * 0.92 + drift, -aimError, aimError);
+
+  let desired;
 
   if (ballComing) {
     const targetX = isLeft ? (p.x + p.w) : p.x;
     const predicted = predictYAtX(targetX);
-    targetY = predicted - p.h / 2 + rand(-aimError, aimError);
-
-    if (Math.random() < 0.015) targetY += rand(-18, 18);
+    desired = predicted - p.h / 2 + p.bias;
   } else {
     const center = h / 2 - p.h / 2;
-    const bob = Math.sin(now / 1000 * idleFreq + p.phase) * idleAmp;
-    targetY = center + bob + rand(-10, 10);
+    const bob = Math.sin((now / 1000) * idleFreq + p.phase) * idleAmp;
+    desired = center + bob + p.bias * 0.5;
   }
 
-  targetY = clamp(targetY, 0, h - p.h);
+  p.targetY = clamp(desired, 0, h - p.h);
 
-  const diff = targetY - p.y;
+  const base = ballComing ? 70 : 120;
+  const jitter = ballComing ? 60 : 110;
+  p.nextRetargetAt = now + base + Math.random() * jitter;
+}
 
-  if (Math.abs(diff) < 6 && Math.random() < twitchChance) {
-    p.vy += rand(-6, 6);
+function moveOnePaddle(p, isLeft, dt, now) {
+  const { h } = getCanvasCSSSize();
+
+  if (now >= p.nextRetargetAt) retargetPaddle(p, isLeft, now);
+
+  const ballComing = isLeft ? ball.vx < 0 : ball.vx > 0;
+
+  let maxSpeed = ballComing ? 10.5 : 7.0;
+  let accel = ballComing ? 1.9 : 1.4;
+  let damping = ballComing ? 0.90 : 0.86;
+
+  if (forcedLose && loseStartTime) {
+    const elapsed = (performance.now() - loseStartTime) / 1000;
+    const degrade = clamp(elapsed / 5, 0, 1);
+    maxSpeed -= degrade * 5.3;
+    accel -= degrade * 0.9;
   }
 
-  const desiredVy = clamp(diff * 0.35, -maxSpeed, maxSpeed);
-  const dv = desiredVy - p.vy;
-  p.vy += clamp(dv, -accel, accel) * dt;
+  const diff = p.targetY - p.y;
+  const desiredVy = clamp(diff * 0.28, -maxSpeed, maxSpeed);
+
+  const blend = clamp(accel * 0.22, 0.10, 0.35);
+  p.vy = p.vy + (desiredVy - p.vy) * blend * dt;
 
   p.vy *= damping;
   p.y += p.vy * dt;
@@ -472,15 +515,15 @@ function paddleBounce(paddle) {
   const clampedHit = clamp(hitPos, -1, 1);
 
   const maxBounce = 0.90;
-  const bounceAngle = clampedHit * maxBounce + rand(-0.06, 0.06);
+  const bounceAngle = clampedHit * maxBounce + rand(-0.05, 0.05);
 
-  ball.speed = clamp(ball.speed + 0.16, 2.9, ball.maxSpeed);
+  ball.speed = clamp(ball.speed + 0.14, 3.1, ball.maxSpeed);
 
   const dir = paddle === leftPaddle ? 1 : -1;
   ball.vx = Math.cos(bounceAngle) * ball.speed * dir;
   ball.vy = Math.sin(bounceAngle) * ball.speed;
 
-  ball.vy += rand(-0.14, 0.14);
+  ball.vy += rand(-0.10, 0.10);
   ball.y = clamp(ball.y, ball.radius, h - ball.radius);
 }
 
@@ -563,7 +606,7 @@ function loop(now) {
   const dtMs = now - lastFrameTime;
   lastFrameTime = now;
 
-  const dt = clamp(dtMs / 16.6667, 0.6, 1.6);
+  const dt = clamp(dtMs / 16.6667, 0.9, 1.1);
 
   if (!matchOver) {
     movePaddles(dt, now);
@@ -630,6 +673,7 @@ setDate();
 
 document.addEventListener('DOMContentLoaded', () => {
   hideAllInfoSets();
+  setAsciiVisible(false);
   setScoreboardVisible(true);
 });
 
