@@ -501,6 +501,37 @@ body {
   visibility: hidden !important;
 }
 
+.back-to-pong{
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 140;
+    padding: 10px 14px;
+    border: 2px solid #0aff0a;
+    background: rgba(0,0,0,0.7);
+    color: #0aff0a;
+    font-family: "Roboto Mono", monospace;
+    font-size: 1.05em;
+    text-shadow: 0 0 5px #0aff0a;
+    box-shadow: 0 0 10px rgba(0,255,0,0.5);
+    cursor: pointer;
+    opacity: 1;
+    transition: filter 0.15s ease, transform 0.08s ease, opacity 0.2s ease;
+}
+
+.back-to-pong:hover{
+    filter: brightness(1.15);
+}
+
+.back-to-pong:active{
+    transform: translateY(2px);
+}
+
+.back-to-pong.hidden{
+    opacity: 0;
+    pointer-events: none;
+}
+
 
 
 
