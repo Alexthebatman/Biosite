@@ -464,6 +464,13 @@ body {
     text-shadow: 0 0 5px #0aff0a;
 }
 
+.date-display {
+    color: #0aff0a;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1em;
+    text-shadow: 0 0 5px #0aff0a;
+    margin-top: 10px;
+}
 
 
 
