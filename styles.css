@@ -2,12 +2,14 @@
 
 .alert-container {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 9999;
+    bottom: 80px;
+    left: 0;
+    width: 100%;
+    background: rgba(139, 0, 0, 0.2);
+    border-top: 1px solid #8b0000;
+    border-bottom: 1px solid #8b0000;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 body {
@@ -449,4 +451,5 @@ body {
     color: #0aff0a;
     text-shadow: 0 0 5px #0aff0a;
 }
+
 
