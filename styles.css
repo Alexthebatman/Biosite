@@ -505,7 +505,7 @@ body {
     position: absolute;
     bottom: 20px;
     left: 20px;
-    z-index: 140;
+    z-index: 200;
     padding: 10px 14px;
     border: 2px solid #0aff0a;
     background: rgba(0,0,0,0.7);
@@ -531,6 +531,7 @@ body {
     opacity: 0;
     pointer-events: none;
 }
+
 
 
 
