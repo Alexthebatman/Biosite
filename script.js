@@ -427,11 +427,31 @@ function transitionScreens() {
     }, 3000);
 }
 
+(function applyAsciiSlant() {
+  const blocks = document.querySelectorAll("pre.ascii-art[data-slant]");
+
+  blocks.forEach((pre) => {
+    const slant = Math.max(0, parseInt(pre.dataset.slant || "0", 10));
+    if (!slant) return;
+
+    const raw = pre.textContent.replace(/\t/g, "  ");
+    const lines = raw.split("\n");
+
+    const slanted = lines.map((line, i) => {
+      if (line.trim().length === 0) return line;
+      return " ".repeat(i * slant) + line;
+    });
+
+    pre.textContent = slanted.join("\n");
+  });
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
     hideAllInfoSets();
 });
 
 initPongGame();
+
 
 
 
