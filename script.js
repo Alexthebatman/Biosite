@@ -448,11 +448,25 @@ function transitionScreens() {
   });
 })();
 
+function setDate() {
+    const dateDisplay = document.querySelector('.date-display');
+    if (!dateDisplay) return;
+    
+    const today = new Date();
+    const options = { month: 'long', day: 'numeric' };
+    const formattedDate = today.toLocaleDateString('en-US', options);
+    
+    dateDisplay.textContent = `${formattedDate}, 1962`;
+}
+
+setDate();
+
 document.addEventListener('DOMContentLoaded', () => {
     hideAllInfoSets();
 });
 
 initPongGame();
+
 
 
 
