@@ -265,13 +265,13 @@ function initPongGame() {
   const w = canvas.getBoundingClientRect().width;
   const h = canvas.getBoundingClientRect().height;
 
-  const initialSpeed = rand(3.2, 5.2);
-  const angle = rand(-0.5, 0.5);
+  const initialSpeed = rand(3.5, 5.0);
+  const angle = rand(-0.6, 0.6);
   const dir = Math.random() < 0.5 ? -1 : 1;
 
   ball = {
     x: w / 2,
-    y: h / 2,
+    y: rand(h * 0.3, h * 0.7),
     vx: Math.cos(angle) * initialSpeed * dir,
     vy: Math.sin(angle) * initialSpeed,
     radius: 6,
@@ -279,8 +279,28 @@ function initPongGame() {
     maxSpeed: 9.5
   };
 
-  leftPaddle = { x: 24, y: rand(h * 0.2, h * 0.6), w: 12, h: 90, vy: 0 };
-  rightPaddle = { x: w - 24 - 12, y: rand(h * 0.2, h * 0.6), w: 12, h: 90, vy: 0 };
+  // Randomized paddle properties for variety each game
+  leftPaddle = {
+    x: 24,
+    y: rand(h * 0.1, h * 0.7),
+    w: 12,
+    h: 90,
+    speed: rand(3.2, 4.2),           // Constant speed, randomized per game
+    direction: 0,                     // -1 up, 0 idle, 1 down
+    reactionOffset: rand(-15, 15),    // Where it "aims" relative to ball
+    deadzone: rand(5, 20)             // How close before it stops
+  };
+
+  rightPaddle = {
+    x: w - 24 - 12,
+    y: rand(h * 0.1, h * 0.7),
+    w: 12,
+    h: 90,
+    speed: rand(3.2, 4.2),
+    direction: 0,
+    reactionOffset: rand(-15, 15),
+    deadzone: rand(5, 20)
+  };
 
   gameOver = false;
   forcedLose = false;
@@ -300,31 +320,58 @@ function initPongGame() {
 function movePaddles() {
   const h = canvas.getBoundingClientRect().height;
 
-  let paddleSpeed = 3.0;
-  let jitter = 10;
-  let reaction = 0.11;
+  // Degrade one paddle's ability over time to force a loss
+  let leftSpeedMod = 1;
+  let rightSpeedMod = 1;
+  let leftDeadzoneMod = 0;
+  let rightDeadzoneMod = 0;
 
   if (forcedLose && loseStartTime) {
     const elapsed = (performance.now() - loseStartTime) / 1000;
-    const degrade = clamp(elapsed / 5, 0, 1);
-    paddleSpeed = paddleSpeed - degrade * 1.6;
-    jitter = jitter + degrade * 25;
-    reaction = reaction - degrade * 0.06;
+    const degrade = clamp(elapsed / 4, 0, 1);
+    
+    // Pick which paddle to handicap based on ball direction
+    if (ball.vx < 0) {
+      leftSpeedMod = 1 - degrade * 0.5;
+      leftDeadzoneMod = degrade * 40;
+    } else {
+      rightSpeedMod = 1 - degrade * 0.5;
+      rightDeadzoneMod = degrade * 40;
+    }
   }
 
-  const leftAim = ball.y - leftPaddle.h / 2 + rand(-jitter, jitter);
-  const rightAim = ball.y - rightPaddle.h / 2 + rand(-jitter, jitter);
+  // Move left paddle - classic Pong constant speed movement
+  const leftTarget = ball.y + leftPaddle.reactionOffset;
+  const leftCenter = leftPaddle.y + leftPaddle.h / 2;
+  const leftDiff = leftTarget - leftCenter;
+  const leftDeadzone = leftPaddle.deadzone + leftDeadzoneMod;
 
-  leftPaddle.vy = (leftAim - leftPaddle.y) * reaction;
-  rightPaddle.vy = (rightAim - rightPaddle.y) * reaction;
+  if (leftDiff > leftDeadzone) {
+    leftPaddle.direction = 1;
+  } else if (leftDiff < -leftDeadzone) {
+    leftPaddle.direction = -1;
+  } else {
+    leftPaddle.direction = 0;
+  }
 
-  leftPaddle.vy = clamp(leftPaddle.vy, -paddleSpeed, paddleSpeed);
-  rightPaddle.vy = clamp(rightPaddle.vy, -paddleSpeed, paddleSpeed);
-
-  leftPaddle.y += leftPaddle.vy;
-  rightPaddle.y += rightPaddle.vy;
-
+  leftPaddle.y += leftPaddle.direction * leftPaddle.speed * leftSpeedMod;
   leftPaddle.y = clamp(leftPaddle.y, 0, h - leftPaddle.h);
+
+  // Move right paddle - same logic
+  const rightTarget = ball.y + rightPaddle.reactionOffset;
+  const rightCenter = rightPaddle.y + rightPaddle.h / 2;
+  const rightDiff = rightTarget - rightCenter;
+  const rightDeadzone = rightPaddle.deadzone + rightDeadzoneMod;
+
+  if (rightDiff > rightDeadzone) {
+    rightPaddle.direction = 1;
+  } else if (rightDiff < -rightDeadzone) {
+    rightPaddle.direction = -1;
+  } else {
+    rightPaddle.direction = 0;
+  }
+
+  rightPaddle.y += rightPaddle.direction * rightPaddle.speed * rightSpeedMod;
   rightPaddle.y = clamp(rightPaddle.y, 0, h - rightPaddle.h);
 }
 
@@ -457,6 +504,7 @@ function stopPongWithFade() {
   }, 500);
 }
 
+
 function transitionScreens() {
     systemOnline.style.opacity = '0';
     systemOnline.style.transition = 'opacity 3s ease-in';
@@ -503,4 +551,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
+
 
