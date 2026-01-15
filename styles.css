@@ -402,6 +402,14 @@ body {
     justify-content: center;
     gap: 20px;
     z-index: 20;
+    opacity: 0; 
+    transition: opacity 2s ease-in;
+    pointer-events: none;
+}
+
+.control-panel.visible {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .metal-button {
@@ -421,6 +429,9 @@ body {
     text-shadow: 0 1px 0 rgba(255,255,255,0.4);
     transition: all 0.1s;
     border-radius: 4px;
+    font-size: 1.4rem;
+    padding: 12px 25px;
+    min-width: 160px;
 }
 
 .metal-button:hover {
@@ -438,3 +449,4 @@ body {
     color: #0aff0a;
     text-shadow: 0 0 5px #0aff0a;
 }
+
