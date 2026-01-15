@@ -132,7 +132,7 @@ function writeStringToElement(element, text, callback) {
 function showInformation() {
     infoSetInformation.style.display = 'flex';
     writeStringToElement(nameContent, 'Alex | rocket_point', () => {
-        writeStringToElement(birthdayContent, 'October 27th, 2003 | 21 & Male', () => {
+        writeStringToElement(birthdayContent, 'October 27th, 2003 | 22 & Male', () => {
             writeStringToElement(likesContent, 'Rockets, Typing, Gaming, Daves', () => {
                 writeStringToElement(dislikesContent, 'Assholes, Bolt tearing up my lego box, college (help)', () => {
                     startAlerts();
@@ -145,7 +145,7 @@ function showInformation() {
 // Show Availability set
 function showAvailability() {
     infoSetAvailability.style.display = 'flex';
-    writeStringToElement(favoritePeopleContent, 'Emmi, Rune; If I talk to you a lot, you are included', () => {
+    writeStringToElement(favoritePeopleContent, 'Luci, Lumi, Emmi, ; If I talk to you a lot, you are included', () => {
         writeStringToElement(notFreeContent, '6 PM - 12 AM on Weekdays | 10 AM - 3 AM on Weekends\n; Favorite people can text any time!', () => {
             startAlerts();
         });
@@ -417,3 +417,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
+
