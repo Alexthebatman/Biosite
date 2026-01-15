@@ -59,6 +59,9 @@ function showHomePong() {
   // hide info sets + show pong again
   hideAllInfoSets();
   setAsciiVisible(false);
+  pointAnnounce = false;
+  matchOver = false;
+
 
   userInteracted = false;
 
@@ -749,6 +752,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
+
 
 
 
