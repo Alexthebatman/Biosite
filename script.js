@@ -600,28 +600,22 @@ function updateBall(dt) {
     paddleBounce(rightPaddle);
   }
 
-if (ball.x + ball.radius < 0) {
-  scoreRight++;
-  updateScoreboardText();
-  announcePoint('right');
+  if (ball.x + ball.radius < 0) {
+    scoreRight++;
+    updateScoreboardText();
+    announcePoint('right');
 
-  if (scoreRight >= WIN_SCORE) {
-    endMatch('right');
-  } else {
-    serveBall(1);
-  }
-} else if (ball.x - ball.radius > w) {
-  scoreLeft++;
-  updateScoreboardText();
-  announcePoint('left');
+    if (scoreRight >= WIN_SCORE) endMatch('right');
+    else serveBall(1);
+  } else if (ball.x - ball.radius > w) {
+    scoreLeft++;
+    updateScoreboardText();
+    announcePoint('left');
 
-  if (scoreLeft >= WIN_SCORE) {
-    endMatch('left');
-  } else {
-    serveBall(-1);
+    if (scoreLeft >= WIN_SCORE) endMatch('left');
+    else serveBall(-1);
   }
 }
-
 
 function draw() {
   const { w, h } = getCanvasCSSSize();
@@ -640,17 +634,19 @@ function draw() {
   ctx.fillStyle = "rgba(255,255,255,0.03)";
   for (let i = 0; i < h; i += 2) ctx.fillRect(0, i, w, 1);
 
+  // Point announcement (only when match is not over)
   if (pointAnnounce && !matchOver) {
-  ctx.fillStyle = "rgba(0,0,0,0.55)";
-  ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = "rgba(0,0,0,0.55)";
+    ctx.fillRect(0, 0, w, h);
 
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "22px Courier New";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(pointAnnounceText, w / 2, h / 2);
-}
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "22px Courier New";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(pointAnnounceText, w / 2, h / 2);
+  }
 
+  // Win announcement overrides everything
   if (matchOver) {
     ctx.fillStyle = "rgba(0,0,0,0.85)";
     ctx.fillRect(0, 0, w, h);
@@ -672,8 +668,8 @@ function loop(now) {
   const dt = clamp(dtMs / 16.6667, 0.9, 1.1);
 
   if (pointAnnounce && now >= pointAnnounceUntil) {
-  pointAnnounce = false;
-}
+    pointAnnounce = false;
+  }
 
   if (!matchOver) {
     movePaddles(dt, now);
@@ -753,6 +749,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
+
 
 
 
