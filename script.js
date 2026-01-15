@@ -225,8 +225,6 @@ function startAlerts() {
 
 const canvas = document.querySelector('.pong-canvas');
 const ctx = canvas.getContext('2d');
-canvas.width = 600;
-canvas.height = 400;
 
 let gameOver = false;
 let pongAnimationId = null;
@@ -235,156 +233,228 @@ let forcedLose = false;
 let forcedLoseTimeout = null;
 let loseStartTime = null;
 
+function rand(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function clamp(v, min, max) {
+  return Math.max(min, Math.min(max, v));
+}
+
+function resizeCanvasToCSS() {
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.floor(rect.width * dpr);
+  canvas.height = Math.floor(rect.height * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+window.addEventListener('resize', () => {
+  if (!canvas || canvas.style.display === 'none') return;
+  resizeCanvasToCSS();
+});
+
 function initPongGame() {
-    if (userInteracted) return;
+  if (userInteracted) return;
 
-    const vx = (Math.random() * 0.8 + 0.7) * (Math.random() < 0.5 ? 1 : -1);
-    const vy = (Math.random() * 0.7 + 0.5) * (Math.random() < 0.5 ? 1 : -1);
+  canvas.style.display = 'block';
+  canvas.style.opacity = '1';
 
-    ball = { x: 300, y: 200, vx, vy, radius: 5 };
+  resizeCanvasToCSS();
 
-    leftPaddle = { x: 20, y: 100 + Math.random() * 100, w: 10, h: 80 };
-    rightPaddle = { x: 570, y: 100 + Math.random() * 100, w: 10, h: 80 };
+  const w = canvas.getBoundingClientRect().width;
+  const h = canvas.getBoundingClientRect().height;
 
-    gameOver = false;
-    forcedLose = false;
-    loseStartTime = null;
+  const initialSpeed = rand(3.2, 5.2);
+  const angle = rand(-0.5, 0.5);
+  const dir = Math.random() < 0.5 ? -1 : 1;
 
-    const forcedLoseTime = (Math.random() * 10 + 10) * 1000;
-    forcedLoseTimeout = setTimeout(() => {
-        if (!gameOver && !userInteracted) {
-            forcedLose = true;
-            loseStartTime = performance.now();
-        }
-    }, forcedLoseTime);
+  ball = {
+    x: w / 2,
+    y: h / 2,
+    vx: Math.cos(angle) * initialSpeed * dir,
+    vy: Math.sin(angle) * initialSpeed,
+    radius: 6,
+    speed: initialSpeed,
+    maxSpeed: 9.5
+  };
 
-    loop();
+  leftPaddle = { x: 24, y: rand(h * 0.2, h * 0.6), w: 12, h: 90, vy: 0 };
+  rightPaddle = { x: w - 24 - 12, y: rand(h * 0.2, h * 0.6), w: 12, h: 90, vy: 0 };
+
+  gameOver = false;
+  forcedLose = false;
+  loseStartTime = null;
+
+  const forcedLoseTime = rand(10, 20) * 1000;
+  forcedLoseTimeout = setTimeout(() => {
+    if (!gameOver && !userInteracted) {
+      forcedLose = true;
+      loseStartTime = performance.now();
+    }
+  }, forcedLoseTime);
+
+  loop();
 }
 
 function movePaddles() {
-    let paddleSpeed = 1.2;
-    let baseError = 1.5;
+  const h = canvas.getBoundingClientRect().height;
 
-    if (forcedLose && loseStartTime) {
-        const elapsed = (performance.now() - loseStartTime) / 1000;
-        let degradeFactor = Math.min(elapsed / 5, 1);
-        paddleSpeed -= degradeFactor * 0.7;
-        baseError += degradeFactor * 3;
-    }
+  let paddleSpeed = 3.0;
+  let jitter = 10;
+  let reaction = 0.11;
 
-    const leftError = (Math.random() - 0.5) * baseError;
-    const rightError = (Math.random() - 0.5) * baseError;
+  if (forcedLose && loseStartTime) {
+    const elapsed = (performance.now() - loseStartTime) / 1000;
+    const degrade = clamp(elapsed / 5, 0, 1);
+    paddleSpeed = paddleSpeed - degrade * 1.6;
+    jitter = jitter + degrade * 25;
+    reaction = reaction - degrade * 0.06;
+  }
 
-    const leftTarget = ball.y - leftPaddle.h / 2 + leftError;
-    const rightTarget = ball.y - rightPaddle.h / 2 + rightError;
+  const leftAim = ball.y - leftPaddle.h / 2 + rand(-jitter, jitter);
+  const rightAim = ball.y - rightPaddle.h / 2 + rand(-jitter, jitter);
 
-    if (leftTarget < leftPaddle.y) leftPaddle.y -= paddleSpeed;
-    else leftPaddle.y += paddleSpeed;
+  leftPaddle.vy = (leftAim - leftPaddle.y) * reaction;
+  rightPaddle.vy = (rightAim - rightPaddle.y) * reaction;
 
-    if (rightTarget < rightPaddle.y) rightPaddle.y -= paddleSpeed;
-    else rightPaddle.y += paddleSpeed;
+  leftPaddle.vy = clamp(leftPaddle.vy, -paddleSpeed, paddleSpeed);
+  rightPaddle.vy = clamp(rightPaddle.vy, -paddleSpeed, paddleSpeed);
 
-    clampPaddle(leftPaddle);
-    clampPaddle(rightPaddle);
+  leftPaddle.y += leftPaddle.vy;
+  rightPaddle.y += rightPaddle.vy;
+
+  leftPaddle.y = clamp(leftPaddle.y, 0, h - leftPaddle.h);
+  rightPaddle.y = clamp(rightPaddle.y, 0, h - rightPaddle.h);
 }
 
-function clampPaddle(p) {
-    if (p.y < 0) p.y = 0;
-    if (p.y + p.h > canvas.height) p.y = canvas.height - p.h;
+function paddleBounce(paddle) {
+  const h = canvas.getBoundingClientRect().height;
+
+  const hitPos = (ball.y - (paddle.y + paddle.h / 2)) / (paddle.h / 2);
+  const clampedHit = clamp(hitPos, -1, 1);
+
+  const maxBounce = 0.9;
+  const bounceAngle = clampedHit * maxBounce + rand(-0.08, 0.08);
+
+  ball.speed = clamp(ball.speed + 0.25, 3, ball.maxSpeed);
+
+  const dir = paddle === leftPaddle ? 1 : -1;
+  ball.vx = Math.cos(bounceAngle) * ball.speed * dir;
+  ball.vy = Math.sin(bounceAngle) * ball.speed;
+
+  ball.vy += rand(-0.25, 0.25);
+
+  ball.y = clamp(ball.y, ball.radius, h - ball.radius);
 }
 
 function updateBall() {
-    ball.x += ball.vx;
-    ball.y += ball.vy;
+  const w = canvas.getBoundingClientRect().width;
+  const h = canvas.getBoundingClientRect().height;
 
-    if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
-        ball.vy = -ball.vy;
-    }
+  ball.x += ball.vx;
+  ball.y += ball.vy;
 
-    if (ball.x - ball.radius < leftPaddle.x + leftPaddle.w &&
-        ball.y > leftPaddle.y && ball.y < leftPaddle.y + leftPaddle.h) {
-        ball.x = leftPaddle.x + leftPaddle.w + ball.radius;
-        ball.vx = -ball.vx;
-    }
+  if (ball.y - ball.radius <= 0 || ball.y + ball.radius >= h) {
+    ball.vy = -ball.vy;
+    ball.y = clamp(ball.y, ball.radius, h - ball.radius);
+  }
 
-    if (ball.x + ball.radius > rightPaddle.x &&
-        ball.y > rightPaddle.y && ball.y < rightPaddle.y + rightPaddle.h) {
-        ball.x = rightPaddle.x - ball.radius;
-        ball.vx = -ball.vx;
-    }
+  if (
+    ball.vx < 0 &&
+    ball.x - ball.radius <= leftPaddle.x + leftPaddle.w &&
+    ball.y >= leftPaddle.y &&
+    ball.y <= leftPaddle.y + leftPaddle.h
+  ) {
+    ball.x = leftPaddle.x + leftPaddle.w + ball.radius;
+    paddleBounce(leftPaddle);
+  }
 
-    if (ball.x < 0 || ball.x > canvas.width) endGame();
+  if (
+    ball.vx > 0 &&
+    ball.x + ball.radius >= rightPaddle.x &&
+    ball.y >= rightPaddle.y &&
+    ball.y <= rightPaddle.y + rightPaddle.h
+  ) {
+    ball.x = rightPaddle.x - ball.radius;
+    paddleBounce(rightPaddle);
+  }
+
+  if (ball.x + ball.radius < 0 || ball.x - ball.radius > w) endGame();
 }
 
 function endGame() {
-    gameOver = true;
-    clearTimeout(forcedLoseTimeout);
-    setTimeout(drawEndScreen, 500);
+  gameOver = true;
+  clearTimeout(forcedLoseTimeout);
+  setTimeout(drawEndScreen, 350);
 }
 
 function drawEndScreen() {
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "20px Courier New";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+  const w = canvas.getBoundingClientRect().width;
+  const h = canvas.getBoundingClientRect().height;
 
-    const winnerText = ball.x < 0 ? "RIGHT PLAYER WINS" : "LEFT PLAYER WINS";
-    ctx.fillText(winnerText, canvas.width / 2, canvas.height / 2);
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, w, h);
 
-    if (!userInteracted) {
-        setTimeout(() => {
-            if (!userInteracted) {
-                resetGame();
-            }
-        }, 3000);
-    }
+  ctx.fillStyle = "#fff";
+  ctx.font = "20px Courier New";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  const winnerText = (ball.x < w / 2) ? "RIGHT PLAYER WINS" : "LEFT PLAYER WINS";
+  ctx.fillText(winnerText, w / 2, h / 2);
+
+  if (!userInteracted) {
+    setTimeout(() => {
+      if (!userInteracted) resetGame();
+    }, 2200);
+  }
 }
 
 function resetGame() {
-    if (userInteracted) return;
-    initPongGame();
+  if (userInteracted) return;
+  initPongGame();
 }
 
 function draw() {
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const w = canvas.getBoundingClientRect().width;
+  const h = canvas.getBoundingClientRect().height;
 
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(leftPaddle.x, leftPaddle.y, leftPaddle.w, leftPaddle.h);
-    ctx.fillRect(rightPaddle.x, rightPaddle.y, rightPaddle.w, rightPaddle.h);
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, w, h);
 
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(leftPaddle.x, leftPaddle.y, leftPaddle.w, leftPaddle.h);
+  ctx.fillRect(rightPaddle.x, rightPaddle.y, rightPaddle.w, rightPaddle.h);
 
-    ctx.fillStyle = "rgba(255,255,255,0.03)";
-    for (let i = 0; i < canvas.height; i += 2) {
-        ctx.fillRect(0, i, canvas.width, 1);
-    }
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "rgba(255,255,255,0.03)";
+  for (let i = 0; i < h; i += 2) ctx.fillRect(0, i, w, 1);
 }
 
 function loop() {
-    if (!gameOver) {
-        movePaddles();
-        updateBall();
-        draw();
-        pongAnimationId = requestAnimationFrame(loop);
-    }
+  if (!gameOver) {
+    movePaddles();
+    updateBall();
+    draw();
+    pongAnimationId = requestAnimationFrame(loop);
+  }
 }
 
 function stopPongWithFade() {
-    userInteracted = true;
-    if (pongAnimationId) {
-        cancelAnimationFrame(pongAnimationId);
-        pongAnimationId = null;
-    }
-    canvas.style.transition = 'opacity 0.5s ease';
-    canvas.style.opacity = '0';
-    setTimeout(() => {
-        canvas.style.display = 'none';
-    }, 500);
+  userInteracted = true;
+  if (pongAnimationId) {
+    cancelAnimationFrame(pongAnimationId);
+    pongAnimationId = null;
+  }
+  canvas.style.transition = 'opacity 0.5s ease';
+  canvas.style.opacity = '0';
+  setTimeout(() => {
+    canvas.style.display = 'none';
+  }, 500);
 }
 
 function transitionScreens() {
@@ -433,3 +503,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
+
