@@ -515,7 +515,7 @@ body {
 .back-to-pong {
     position: absolute;
     bottom: 35px;
-    left: 20px;
+    left: 45px;
     z-index: 250;
     color: #0aff0a;
     font-family: 'Roboto Mono', monospace;
@@ -543,4 +543,5 @@ body {
     visibility: hidden;
     pointer-events: none;
 }
+
 
