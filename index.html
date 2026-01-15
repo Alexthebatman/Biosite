@@ -7,13 +7,16 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
 <div class="crt-monitor">
     <div class="control-panel">
         <div class="metal-button menu-item">Information</div>
         <div class="metal-button menu-item">Availability</div>
         <div class="metal-button menu-item">Misc.</div>
     </div>
+
     <div class="flicker-container"></div>
+
     <div class="crt-screen">
         <p class="crt-text">
             SYSTEM ONLINE
@@ -24,10 +27,11 @@
             </span>
         </p>
     </div>
+
     <div class="alert-container"></div>
+
     <div class="new-screen">
         <div class="content-container">
-            <!-- ASCII Art Header - Always visible on new-screen -->
             <pre class="ascii-art" data-slant="1">
     ___    __    _______  __ ___    _   ______  __________ 
    /   |  / /   / ____/ |/ //   |  / | / / __ \/ ____/ __ \
@@ -54,6 +58,7 @@
                     <div class="typed-content dislikes-content"></div>
                 </div>
             </div>
+
             <div class="info-set info-set-misc" style="display:none;">
                 <div class="info-row">
                     <div class="info-box">Fun Facts</div>
@@ -68,6 +73,7 @@
                     <div class="typed-content suggestions-content"></div>
                 </div>
             </div>
+
             <div class="info-set info-set-availability" style="display:none;">
                 <div class="info-row">
                     <div class="info-box">Favorite People</div>
@@ -79,9 +85,11 @@
                 </div>
             </div>
         </div>
+
         <canvas class="pong-canvas"></canvas>
     </div> 
 </div> 
+
 <script src="script.js"></script>
 </body>
 </html>
