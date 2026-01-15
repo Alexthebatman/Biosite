@@ -299,7 +299,7 @@ body {
 
 .ascii-art{
   font-family: "Roboto Mono", "Courier New", monospace;
-  font-size: 14px;
+  font-size: 20px;
   line-height: 1;
   letter-spacing: 0;
   white-space: pre;
@@ -477,6 +477,7 @@ body {
     box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
     background-color: rgba(0, 0, 0, 0.7);
 }
+
 
 
 
