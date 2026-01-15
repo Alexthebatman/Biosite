@@ -20,7 +20,6 @@ const infoSetAvailability = document.querySelector('.info-set-availability');
 const infoSetMisc = document.querySelector('.info-set-misc');
 
 const pongScoreboard = document.querySelector('.pong-scoreboard');
-
 const infoSets = document.querySelectorAll('.info-set');
 
 let userInteracted = false;
@@ -28,9 +27,7 @@ let isTransitioning = false;
 let currentTypingElement = null;
 
 function hideAllInfoSets() {
-  infoSets.forEach(set => {
-    set.style.display = 'none';
-  });
+  infoSets.forEach(set => (set.style.display = 'none'));
 
   const typedContents = document.querySelectorAll('.typed-content');
   typedContents.forEach(element => {
@@ -51,6 +48,8 @@ function transitionScreens() {
   setTimeout(() => {
     systemOnline.style.display = 'none';
     newScreen.classList.add('active');
+    const cp = document.querySelector('.control-panel');
+    if (cp) cp.classList.add('visible');
   }, 3000);
 }
 setTimeout(transitionScreens, 1000);
@@ -74,9 +73,7 @@ function activateRandomFlicker() {
 }
 
 function randomFlicker() {
-  if (Math.random() < 0.01) {
-    activateRandomFlicker();
-  }
+  if (Math.random() < 0.01) activateRandomFlicker();
 }
 setInterval(randomFlicker, 3000);
 
@@ -129,24 +126,49 @@ function showInformation() {
 
 function showAvailability() {
   infoSetAvailability.style.display = 'flex';
-  writeStringToElement(favoritePeopleContent, 'Luci, Lumi, Emmi, ; If I talk to you a lot, you are included', () => {
-    writeStringToElement(notFreeContent, '6 PM - 12 AM on Weekdays | 10 AM - 3 AM on Weekends\n; Favorite people can text any time!', () => {
-      startAlerts();
-    });
-  });
+  writeStringToElement(
+    favoritePeopleContent,
+    'Luci, Lumi, Emmi, ; If I talk to you a lot, you are included',
+    () => {
+      writeStringToElement(
+        notFreeContent,
+        '6 PM - 12 AM on Weekdays | 10 AM - 3 AM on Weekends\n; Favorite people can text any time!',
+        () => startAlerts()
+      );
+    }
+  );
 }
 
 function showMisc() {
-  if (infoSetMisc) {
-    infoSetMisc.style.display = 'flex';
-    writeStringToElement(funFactsContent, 'I have died a couple of times and nearly a lot of other times, plus I have a sick setup.', () => {
-      writeStringToElement(inspiredContent, 'Inspired by cold war era tech and me wanting to make myself a bio. I also got inspired to make this by Sophie :)', () => {
-        writeStringToElement(suggestionsContent, 'Text me about anything I might have missed :)', () => {
-          startAlerts();
-        });
-      });
-    });
-  }
+  if (!infoSetMisc) return;
+  infoSetMisc.style.display = 'flex';
+  writeStringToElement(
+    funFactsContent,
+    'I have died a couple of times and nearly a lot of other times, plus I have a sick setup.',
+    () => {
+      writeStringToElement(
+        inspiredContent,
+        'Inspired by cold war era tech and me wanting to make myself a bio. I also got inspired to make this by Sophie :)',
+        () => {
+          writeStringToElement(suggestionsContent, 'Text me about anything I might have missed :)', () => {
+            startAlerts();
+          });
+        }
+      );
+    }
+  );
+}
+
+function setScoreboardVisible(v) {
+  if (!pongScoreboard) return;
+  pongScoreboard.style.opacity = v ? '1' : '0';
+  pongScoreboard.style.visibility = v ? 'visible' : 'hidden';
+  pongScoreboard.style.pointerEvents = 'none';
+  pongScoreboard.style.position = 'absolute';
+  pongScoreboard.style.top = '20px';
+  pongScoreboard.style.left = '50%';
+  pongScoreboard.style.transform = 'translateX(-50%)';
+  pongScoreboard.style.zIndex = '120';
 }
 
 buttons.forEach((button) => {
@@ -156,17 +178,12 @@ buttons.forEach((button) => {
 
     userInteracted = true;
     stopPongWithFade();
-    if (pongScoreboard) pongScoreboard.classList.add('hidden-ui');
+    setScoreboardVisible(false);
 
     const buttonText = event.target.textContent.trim();
-
-    if (buttonText === 'Information') {
-      activateTransitionFlicker(showInformation);
-    } else if (buttonText === 'Availability') {
-      activateTransitionFlicker(showAvailability);
-    } else if (buttonText === 'Misc.') {
-      activateTransitionFlicker(showMisc);
-    }
+    if (buttonText === 'Information') activateTransitionFlicker(showInformation);
+    else if (buttonText === 'Availability') activateTransitionFlicker(showAvailability);
+    else if (buttonText === 'Misc.') activateTransitionFlicker(showMisc);
   });
 });
 
@@ -201,35 +218,28 @@ function showRandomAlert() {
     currentAlertIndex = 0;
   }
 
-  const randomMsg = shuffledMessages[currentAlertIndex];
-  currentAlertIndex++;
-
+  const msg = shuffledMessages[currentAlertIndex++];
   const alertBox = document.createElement('div');
   alertBox.className = 'alert-box';
-  alertBox.textContent = randomMsg;
+  alertBox.textContent = msg;
 
   alertContainer.appendChild(alertBox);
 
   setTimeout(() => {
     alertBox.classList.add('alert-fade-out');
     setTimeout(() => {
-      if (alertBox.parentNode === alertContainer) {
-        alertContainer.removeChild(alertBox);
-      }
+      if (alertBox.parentNode === alertContainer) alertContainer.removeChild(alertBox);
     }, 1000);
   }, 4000);
 }
 
 function startAlerts() {
-  if (!alertInterval) {
-    alertInterval = setInterval(showRandomAlert, 5000);
-  }
+  if (!alertInterval) alertInterval = setInterval(showRandomAlert, 5000);
 }
 
 const canvas = document.querySelector('.pong-canvas');
 const ctx = canvas.getContext('2d');
 
-let gameOver = false;
 let pongAnimationId = null;
 
 let ball, leftPaddle, rightPaddle;
@@ -241,6 +251,11 @@ let scoreLeft = 0;
 let scoreRight = 0;
 
 let lastFrameTime = performance.now();
+
+const WIN_SCORE = 7;
+let matchOver = false;
+let matchOverUntil = 0;
+let matchWinnerText = '';
 
 function rand(min, max) {
   return Math.random() * (max - min) + min;
@@ -263,14 +278,49 @@ function resizeCanvasToCSS() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
+function predictYAtX(targetX) {
+  const { h } = getCanvasCSSSize();
+  if (!ball || Math.abs(ball.vx) < 0.0001) return ball ? ball.y : h / 2;
+
+  let t = (targetX - ball.x) / ball.vx;
+  if (t < 0) t = 0;
+
+  const top = ball.radius;
+  const bottom = h - ball.radius;
+  const span = bottom - top;
+
+  let y = ball.y + ball.vy * t;
+
+  if (span <= 0) return clamp(y, top, bottom);
+
+  let m = (y - top) % (2 * span);
+  if (m < 0) m += 2 * span;
+  if (m > span) m = 2 * span - m;
+
+  return top + m;
+}
+
+function updateScoreboardText() {
+  if (!pongScoreboard) return;
+  pongScoreboard.textContent = `LEFT ${scoreLeft} : ${scoreRight} RIGHT`;
+}
+
 function initPongGame() {
   if (userInteracted) return;
 
   canvas.style.display = 'block';
   canvas.style.opacity = '1';
   canvas.style.pointerEvents = 'none';
+  canvas.style.zIndex = '1';
 
-  if (pongScoreboard) pongScoreboard.classList.remove('hidden-ui');
+  const contentContainer = document.querySelector('.content-container');
+  if (contentContainer) {
+    contentContainer.style.position = 'relative';
+    contentContainer.style.zIndex = '5';
+  }
+
+  const cp = document.querySelector('.control-panel');
+  if (cp) cp.style.zIndex = '100';
 
   resizeCanvasToCSS();
 
@@ -278,33 +328,35 @@ function initPongGame() {
 
   scoreLeft = 0;
   scoreRight = 0;
-  if (pongScoreboard) pongScoreboard.textContent = `LEFT ${scoreLeft} : ${scoreRight} RIGHT`;
+  matchOver = false;
+  matchWinnerText = '';
+  setScoreboardVisible(true);
+  updateScoreboardText();
 
-  leftPaddle = { x: 20, y: 100 + Math.random() * 100, w: 10, h: 80 };
-  rightPaddle = { x: w - 20 - 10, y: 100 + Math.random() * 100, w: 10, h: 80 };
+  leftPaddle = { x: 20, y: 100 + Math.random() * 100, w: 10, h: 80, vy: rand(-1, 1), phase: rand(0, Math.PI * 2) };
+  rightPaddle = { x: w - 20 - 10, y: 100 + Math.random() * 100, w: 10, h: 80, vy: rand(-1, 1), phase: rand(0, Math.PI * 2) };
 
   serveBall(Math.random() < 0.5 ? 1 : -1);
 
-  gameOver = false;
   forcedLose = false;
   loseStartTime = null;
 
   const forcedLoseTime = (Math.random() * 10 + 10) * 1000;
   forcedLoseTimeout = setTimeout(() => {
-    if (!gameOver && !userInteracted) {
+    if (!matchOver && !userInteracted) {
       forcedLose = true;
       loseStartTime = performance.now();
     }
   }, forcedLoseTime);
 
   lastFrameTime = performance.now();
-  loop(lastFrameTime);
+  pongAnimationId = requestAnimationFrame(loop);
 }
 
 function serveBall(dir) {
   const { w, h } = getCanvasCSSSize();
 
-  const baseSpeed = rand(2.6, 3.4);
+  const baseSpeed = rand(3.2, 4.0);
   const angle = rand(-0.35, 0.35);
 
   ball = {
@@ -314,37 +366,103 @@ function serveBall(dir) {
     vy: Math.sin(angle) * baseSpeed,
     radius: 5,
     speed: baseSpeed,
-    maxSpeed: 5.4
+    maxSpeed: 6.1
   };
 }
 
-function movePaddles(dt) {
+function endMatch(winner) {
+  matchOver = true;
+  matchWinnerText = winner === 'left' ? 'Left side wins' : 'Right side wins';
+  matchOverUntil = performance.now() + 2200;
+
+  clearTimeout(forcedLoseTimeout);
+}
+
+function resetMatch() {
+  const { w } = getCanvasCSSSize();
+
+  scoreLeft = 0;
+  scoreRight = 0;
+  updateScoreboardText();
+
+  matchOver = false;
+  matchWinnerText = '';
+
+  leftPaddle.vy = rand(-1, 1);
+  rightPaddle.vy = rand(-1, 1);
+
+  serveBall(Math.random() < 0.5 ? 1 : -1);
+
+  forcedLose = false;
+  loseStartTime = null;
+
+  const forcedLoseTime = (Math.random() * 10 + 10) * 1000;
+  forcedLoseTimeout = setTimeout(() => {
+    if (!matchOver && !userInteracted) {
+      forcedLose = true;
+      loseStartTime = performance.now();
+    }
+  }, forcedLoseTime);
+}
+
+function moveOnePaddle(p, isLeft, dt, now) {
   const { h } = getCanvasCSSSize();
 
-  let paddleSpeed = 1.45;
-  let jitter = 5.0;
-  let reaction = 0.11;
+  const ballComing = isLeft ? ball.vx < 0 : ball.vx > 0;
+
+  let maxSpeed = ballComing ? 10.0 : 6.5;
+  let accel = ballComing ? 2.4 : 1.6;
+  let damping = ballComing ? 0.88 : 0.82;
+
+  let aimError = ballComing ? 10 : 18;
+  let idleAmp = 26;
+  let idleFreq = 1.2;
+  let twitchChance = 0.010;
 
   if (forcedLose && loseStartTime) {
     const elapsed = (performance.now() - loseStartTime) / 1000;
     const degrade = clamp(elapsed / 5, 0, 1);
-    paddleSpeed = paddleSpeed - degrade * 0.7;
-    jitter = jitter + degrade * 14;
-    reaction = reaction - degrade * 0.05;
+    maxSpeed = maxSpeed - degrade * 5.0;
+    accel = accel - degrade * 1.2;
+    aimError = aimError + degrade * 28;
+    idleAmp = idleAmp + degrade * 18;
   }
 
-  const leftAim = ball.y - leftPaddle.h / 2 + rand(-jitter, jitter);
-  const rightAim = ball.y - rightPaddle.h / 2 + rand(-jitter, jitter);
+  let targetY;
 
-  const leftDelta = (leftAim - leftPaddle.y) * reaction;
-  const rightDelta = (rightAim - rightPaddle.y) * reaction;
+  if (ballComing) {
+    const targetX = isLeft ? (p.x + p.w) : p.x;
+    const predicted = predictYAtX(targetX);
+    targetY = predicted - p.h / 2 + rand(-aimError, aimError);
 
-  const maxStep = paddleSpeed * dt;
-  leftPaddle.y += clamp(leftDelta, -maxStep, maxStep);
-  rightPaddle.y += clamp(rightDelta, -maxStep, maxStep);
+    if (Math.random() < 0.015) targetY += rand(-18, 18);
+  } else {
+    const center = h / 2 - p.h / 2;
+    const bob = Math.sin(now / 1000 * idleFreq + p.phase) * idleAmp;
+    targetY = center + bob + rand(-10, 10);
+  }
 
-  leftPaddle.y = clamp(leftPaddle.y, 0, h - leftPaddle.h);
-  rightPaddle.y = clamp(rightPaddle.y, 0, h - rightPaddle.h);
+  targetY = clamp(targetY, 0, h - p.h);
+
+  const diff = targetY - p.y;
+
+  if (Math.abs(diff) < 6 && Math.random() < twitchChance) {
+    p.vy += rand(-6, 6);
+  }
+
+  const desiredVy = clamp(diff * 0.35, -maxSpeed, maxSpeed);
+  const dv = desiredVy - p.vy;
+  p.vy += clamp(dv, -accel, accel) * dt;
+
+  p.vy *= damping;
+  p.y += p.vy * dt;
+
+  p.y = clamp(p.y, 0, h - p.h);
+}
+
+function movePaddles(dt, now) {
+  moveOnePaddle(leftPaddle, true, dt, now);
+  moveOnePaddle(rightPaddle, false, dt, now);
 }
 
 function paddleBounce(paddle) {
@@ -353,17 +471,16 @@ function paddleBounce(paddle) {
   const hitPos = (ball.y - (paddle.y + paddle.h / 2)) / (paddle.h / 2);
   const clampedHit = clamp(hitPos, -1, 1);
 
-  const maxBounce = 0.85;
+  const maxBounce = 0.90;
   const bounceAngle = clampedHit * maxBounce + rand(-0.06, 0.06);
 
-  ball.speed = clamp(ball.speed + 0.14, 2.4, ball.maxSpeed);
+  ball.speed = clamp(ball.speed + 0.16, 2.9, ball.maxSpeed);
 
   const dir = paddle === leftPaddle ? 1 : -1;
   ball.vx = Math.cos(bounceAngle) * ball.speed * dir;
   ball.vy = Math.sin(bounceAngle) * ball.speed;
 
-  ball.vy += rand(-0.10, 0.10);
-
+  ball.vy += rand(-0.14, 0.14);
   ball.y = clamp(ball.y, ball.radius, h - ball.radius);
 }
 
@@ -400,12 +517,14 @@ function updateBall(dt) {
 
   if (ball.x + ball.radius < 0) {
     scoreRight++;
-    if (pongScoreboard) pongScoreboard.textContent = `LEFT ${scoreLeft} : ${scoreRight} RIGHT`;
-    serveBall(1);
+    updateScoreboardText();
+    if (scoreRight >= WIN_SCORE) endMatch('right');
+    else serveBall(1);
   } else if (ball.x - ball.radius > w) {
     scoreLeft++;
-    if (pongScoreboard) pongScoreboard.textContent = `LEFT ${scoreLeft} : ${scoreRight} RIGHT`;
-    serveBall(-1);
+    updateScoreboardText();
+    if (scoreLeft >= WIN_SCORE) endMatch('left');
+    else serveBall(-1);
   }
 }
 
@@ -425,20 +544,35 @@ function draw() {
 
   ctx.fillStyle = "rgba(255,255,255,0.03)";
   for (let i = 0; i < h; i += 2) ctx.fillRect(0, i, w, 1);
+
+  if (matchOver) {
+    ctx.fillStyle = "rgba(0,0,0,0.85)";
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "22px Courier New";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(matchWinnerText, w / 2, h / 2);
+  }
 }
 
 function loop(now) {
-  if (userInteracted || gameOver) return;
+  if (userInteracted) return;
 
   const dtMs = now - lastFrameTime;
   lastFrameTime = now;
 
-  const dt = clamp(dtMs / 16.6667, 0.5, 1.5);
+  const dt = clamp(dtMs / 16.6667, 0.6, 1.6);
 
-  movePaddles(dt);
-  updateBall(dt);
+  if (!matchOver) {
+    movePaddles(dt, now);
+    updateBall(dt);
+  } else if (now >= matchOverUntil) {
+    resetMatch();
+  }
+
   draw();
-
   pongAnimationId = requestAnimationFrame(loop);
 }
 
@@ -450,7 +584,7 @@ function stopPongWithFade() {
     pongAnimationId = null;
   }
 
-  if (pongScoreboard) pongScoreboard.classList.add('hidden-ui');
+  clearTimeout(forcedLoseTimeout);
 
   canvas.style.transition = 'opacity 0.5s ease';
   canvas.style.opacity = '0';
@@ -463,16 +597,6 @@ window.addEventListener('resize', () => {
   if (!canvas || canvas.style.display === 'none' || userInteracted) return;
   resizeCanvasToCSS();
 });
-
-function transitionScreens() {
-  systemOnline.style.opacity = '0';
-  systemOnline.style.transition = 'opacity 3s ease-in';
-  setTimeout(() => {
-    systemOnline.style.display = 'none';
-    newScreen.classList.add('active');
-    document.querySelector('.control-panel').classList.add('visible');
-  }, 3000);
-}
 
 (function applyAsciiSlant() {
   const blocks = document.querySelectorAll("pre.ascii-art[data-slant]");
@@ -502,11 +626,11 @@ function setDate() {
 
   dateDisplay.textContent = `${formattedDate}, 1962`;
 }
-
 setDate();
 
 document.addEventListener('DOMContentLoaded', () => {
   hideAllInfoSets();
+  setScoreboardVisible(true);
 });
 
 initPongGame();
