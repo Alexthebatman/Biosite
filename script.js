@@ -230,11 +230,14 @@ function showRandomAlert() {
 
     alertContainer.appendChild(alertBox);
 
+setTimeout(() => {
+    alertBox.classList.add('alert-fade-out'); // Add fade class
     setTimeout(() => {
         if (alertBox.parentNode === alertContainer) {
             alertContainer.removeChild(alertBox);
         }
-    }, 7000);
+    }, 1000); // Wait for fade animation to finish
+}, 6000);
 }
 
 function startAlerts() {
@@ -429,5 +432,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
+
 
 
