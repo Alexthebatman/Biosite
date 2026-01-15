@@ -374,7 +374,6 @@ body {
     animation: alert-pop-in 0.5s ease forwards;
 }
 
-/* Alert Fade out animation */
 .alert-fade {
     animation: alert-pop-out 1s ease forwards !important;
 }
@@ -433,7 +432,7 @@ body {
     border: 2px solid #333;
     border-top-color: #f0f0f0;
     border-left-color: #f0f0f0;
-    padding: 15px 30px; /* BIGGER BUTTONS */
+    padding: 15px 30px;
     font-family: 'Jaro', sans-serif;
     color: #1a1a1a;
     font-weight: bold;
@@ -445,7 +444,7 @@ body {
     text-shadow: 0 1px 0 rgba(255,255,255,0.4);
     transition: all 0.1s;
     border-radius: 4px;
-    font-size: 1.6rem; /* BIGGER WORDS */
+    font-size: 1.6rem;
     min-width: 180px;
 }
 
@@ -485,7 +484,7 @@ body {
   top: 16px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 101; /* above canvas, below alerts */
+  z-index: 101;
   color: #0aff0a;
   font-family: 'Roboto Mono', monospace;
   font-size: 1.2em;
@@ -501,6 +500,7 @@ body {
   opacity: 0 !important;
   visibility: hidden !important;
 }
+
 
 
 
