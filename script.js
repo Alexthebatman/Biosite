@@ -706,7 +706,6 @@ setDate();
 
 if (backToPongBtn) {
   backToPongBtn.addEventListener('click', () => {
-    // only makes sense after you left home
     showBackButton(false);
     showHomePong();
   });
@@ -720,4 +719,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
+
 
