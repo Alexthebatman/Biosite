@@ -25,6 +25,9 @@ const infoSets = document.querySelectorAll('.info-set');
 
 const backToPongBtn = document.querySelector('.back-to-pong');
 const contentContainer = document.querySelector('.content-container');
+let pointAnnounce = false;
+let pointAnnounceUntil = 0;
+let pointAnnounceText = '';
 
 
 let userInteracted = false;
@@ -439,6 +442,12 @@ function endMatch(winner) {
   clearTimeout(forcedLoseTimeout);
 }
 
+function announcePoint(side) {
+  pointAnnounce = true;
+  pointAnnounceText = side === 'left' ? 'Left side scores' : 'Right side scores';
+  pointAnnounceUntil = performance.now() + 900; // how long it stays on screen (ms)
+}
+
 function resetMatch() {
   scoreLeft = 0;
   scoreRight = 0;
@@ -591,18 +600,28 @@ function updateBall(dt) {
     paddleBounce(rightPaddle);
   }
 
-  if (ball.x + ball.radius < 0) {
-    scoreRight++;
-    updateScoreboardText();
-    if (scoreRight >= WIN_SCORE) endMatch('right');
-    else serveBall(1);
-  } else if (ball.x - ball.radius > w) {
-    scoreLeft++;
-    updateScoreboardText();
-    if (scoreLeft >= WIN_SCORE) endMatch('left');
-    else serveBall(-1);
+if (ball.x + ball.radius < 0) {
+  scoreRight++;
+  updateScoreboardText();
+  announcePoint('right');
+
+  if (scoreRight >= WIN_SCORE) {
+    endMatch('right');
+  } else {
+    serveBall(1);
+  }
+} else if (ball.x - ball.radius > w) {
+  scoreLeft++;
+  updateScoreboardText();
+  announcePoint('left');
+
+  if (scoreLeft >= WIN_SCORE) {
+    endMatch('left');
+  } else {
+    serveBall(-1);
   }
 }
+
 
 function draw() {
   const { w, h } = getCanvasCSSSize();
@@ -719,5 +738,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
+
 
 
