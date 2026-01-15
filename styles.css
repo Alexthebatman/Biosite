@@ -544,4 +544,241 @@ body {
     pointer-events: none;
 }
 
+/* =========================
+   Responsive: Tablet + Mobile
+   Paste at bottom of styles.css
+   ========================= */
 
+/* Tablet (portrait + landscape) */
+@media (max-width: 1024px) {
+  body {
+    /* mobile browsers behave better with svh */
+    height: auto;
+    min-height: 100svh;
+    padding: 16px;
+  }
+
+  .crt-monitor {
+    width: 92vw;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    max-width: 980px;
+    max-height: 86svh;
+    border-width: 1.6vw;
+    border-radius: 10px;
+  }
+
+  .crt-text {
+    font-size: 18px; /* override 2vw */
+  }
+
+  .content-container {
+    margin-left: 14px;
+    margin-top: 14px;
+  }
+
+  .ascii-art {
+    font-size: 16px;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-right: 6px;
+  }
+
+  .info-row {
+    gap: 14px;
+  }
+
+  .info-box {
+    width: 130px;
+    font-size: 0.78em;
+    padding: 4px;
+  }
+
+  .typed-content {
+    font-size: 1.4rem;
+    line-height: 1.15;
+    max-width: 100%;
+    word-break: break-word;
+  }
+
+  /* Bottom control panel buttons */
+  .control-panel {
+    bottom: 18px;
+    gap: 14px;
+  }
+
+  /* Your elements are both .metal-button and .menu-item */
+  .menu-item {
+    width: auto;
+    height: auto;
+  }
+
+  .metal-button {
+    min-width: 150px;
+    padding: 12px 18px;
+    font-size: 1.25rem;
+  }
+
+  .pong-scoreboard {
+    top: 14px;
+    font-size: 1.05em;
+    padding: 6px 10px;
+  }
+
+  .date-display {
+    bottom: 18px;
+    right: 14px;
+    font-size: 1.05em;
+    padding: 6px 10px;
+  }
+
+  .back-to-pong {
+    bottom: 18px;
+    left: 14px;
+    font-size: 1.05em;
+    padding: 6px 10px;
+  }
+
+  .alert-container {
+    top: 14px;
+    right: 14px;
+    gap: 8px;
+  }
+
+  .alert-box {
+    width: 200px;
+    font-size: 0.85em;
+    padding: 9px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  .crt-monitor {
+    width: 96vw;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    max-height: 88svh;
+    border-width: 2.4vw;
+    border-radius: 10px;
+  }
+
+  /* Tighten CRT overlay artifacts a bit */
+  .crt-monitor::after {
+    background-size: 100% 3px;
+  }
+
+  .crt-text {
+    font-size: 16px;
+  }
+
+  .content-container {
+    margin-left: 10px;
+    margin-top: 10px;
+  }
+
+  .ascii-art {
+    font-size: 12px;
+    line-height: 1.05;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .info-set {
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  /* Stack label + typed content so it doesn't overflow */
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .info-box {
+    width: auto;
+    min-width: 0;
+    padding: 5px 8px;
+    font-size: 0.82em;
+  }
+
+  .typed-content {
+    font-size: 1.15rem;
+    line-height: 1.2;
+    max-width: 100%;
+    word-break: break-word;
+  }
+
+  /* Make the control panel usable on small screens */
+  .control-panel {
+    bottom: 14px;
+    gap: 10px;
+    padding: 0 10px;
+    flex-wrap: wrap;
+  }
+
+  .menu-item {
+    width: auto;
+    height: auto;
+  }
+
+  .metal-button {
+    min-width: 120px;
+    padding: 10px 12px;
+    font-size: 1.05rem;
+  }
+
+  /* Move HUD elements in so they don't collide with safe areas */
+  .pong-scoreboard {
+    top: 10px;
+    font-size: 0.95em;
+    padding: 5px 8px;
+  }
+
+  .date-display {
+    bottom: 12px;
+    right: 12px;
+    font-size: 0.95em;
+    padding: 6px 8px;
+  }
+
+  .back-to-pong {
+    bottom: 12px;
+    left: 12px;
+    font-size: 0.95em;
+    padding: 6px 8px;
+  }
+
+  /* Alerts: smaller and pushed down so they don't sit on top of scoreboard */
+  .alert-container {
+    top: 52px;
+    right: 10px;
+    gap: 6px;
+  }
+
+  .alert-box {
+    width: 170px;
+    font-size: 0.78em;
+    padding: 8px;
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 380px) {
+  .ascii-art {
+    font-size: 11px;
+  }
+  .metal-button {
+    min-width: 108px;
+    font-size: 0.98rem;
+    padding: 9px 10px;
+  }
+  .alert-box {
+    width: 155px;
+  }
+}
