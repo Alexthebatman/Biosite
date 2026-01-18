@@ -241,7 +241,7 @@ const alertMessages = [
   "Soviet submarines detected near the Eastern Seaboard",
   "Diplomatic talks failing; intelligence suggests hidden warheads in Europe",
   "NATO on high alert: Unconfirmed reports of missile test launches",
-  "Spy planes reveal increased activity at classified facilities"
+  "Spy planes reveal increased activity at classified facilities",
   "Intelligence analysts report increased Soviet missile readiness",
   "Reconnaissance flights expanded amid unresolved security concerns",
   "Naval task groups repositioned under heightened alert status",
@@ -777,6 +777,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
+
 
 
 
