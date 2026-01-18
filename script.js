@@ -174,7 +174,7 @@ function showAvailability() {
   infoSetAvailability.style.display = 'flex';
   writeStringToElement(
     favoritePeopleContent,
-    'Luci, Lumi, Emmi, ; If I talk to you a lot, you are included',
+    'Luci, Emma <3, Lumi, Emmi, ; If I talk to you a lot, you are included',
     () => {
       writeStringToElement(
         notFreeContent,
@@ -242,6 +242,21 @@ const alertMessages = [
   "Diplomatic talks failing; intelligence suggests hidden warheads in Europe",
   "NATO on high alert: Unconfirmed reports of missile test launches",
   "Spy planes reveal increased activity at classified facilities"
+  "Intelligence analysts report increased Soviet missile readiness",
+  "Reconnaissance flights expanded amid unresolved security concerns",
+  "Naval task groups repositioned under heightened alert status",
+  "Early-warning systems record unexplained tracking anomalies",
+  "Strategic bomber crews placed on extended standby rotations",
+  "Diplomatic communications strained following classified developments",
+  "Soviet shipping patterns trigger intelligence review",
+  "Civil defense agencies quietly update response procedures",
+  "Unconfirmed reports suggest deployment of medium-range systems",
+  "Military command conducts unscheduled readiness exercises",
+  "Surveillance assets redirected toward priority regions",
+  "Backchannel negotiations continue under strict secrecy",
+  "Air defense forces increase patrol frequency",
+  "Classified briefings raise concern among senior officials",
+  "Launch authorization protocols reviewed at command level"
 ];
 
 function shuffleArray(array) {
@@ -762,6 +777,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 initPongGame();
+
 
 
 
