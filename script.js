@@ -174,7 +174,7 @@ function showAvailability() {
   infoSetAvailability.style.display = 'flex';
   writeStringToElement(
     favoritePeopleContent,
-    'Ria, Emma <3, Lumi, Emmi, ; If I talk to you a lot, you are included',
+    'Emma <3, Lumi, Emmi, ; If I talk to you a lot, you are included',
     () => {
       writeStringToElement(
         notFreeContent,
