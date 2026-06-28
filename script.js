@@ -210,12 +210,6 @@ function setScoreboardVisible(v) {
   if (!pongScoreboard) return;
   pongScoreboard.style.opacity = v ? '1' : '0';
   pongScoreboard.style.visibility = v ? 'visible' : 'hidden';
-  pongScoreboard.style.pointerEvents = 'none';
-  pongScoreboard.style.position = 'absolute';
-  pongScoreboard.style.top = '20px';
-  pongScoreboard.style.left = '50%';
-  pongScoreboard.style.transform = 'translateX(-50%)';
-  pongScoreboard.style.zIndex = '120';
 }
 
 buttons.forEach((button) => {
@@ -315,7 +309,7 @@ let scoreRight = 0;
 
 let lastFrameTime = performance.now();
 
-const WIN_SCORE = 7;
+const WIN_SCORE = 5;
 let matchOver = false;
 let matchOverUntil = 0;
 let matchWinnerText = '';
@@ -331,6 +325,12 @@ function clamp(v, min, max) {
 function getCanvasCSSSize() {
   const r = canvas.getBoundingClientRect();
   return { w: r.width, h: r.height };
+}
+
+const PONG_REF_WIDTH = 800;
+
+function pongScale() {
+  return getCanvasCSSSize().w / PONG_REF_WIDTH;
 }
 
 function resizeCanvasToCSS() {
@@ -381,9 +381,6 @@ function initPongGame() {
     contentContainer.style.zIndex = '5';
   }
 
-  const cp = document.querySelector('.control-panel');
-  if (cp) cp.style.zIndex = '100';
-
   resizeCanvasToCSS();
 
   const { w, h } = getCanvasCSSSize();
@@ -395,27 +392,29 @@ function initPongGame() {
   setScoreboardVisible(true);
   updateScoreboardText();
 
+  const s = pongScale();
+
   leftPaddle = {
-    x: 20,
-    y: 100 + Math.random() * 100,
-    w: 10,
-    h: 80,
-    vy: rand(-0.6, 0.6),
+    x: 15 * s,
+    y: (100 + Math.random() * 100) * s,
+    w: 8 * s,
+    h: 55 * s,
+    vy: rand(-0.6, 0.6) * s,
     phase: rand(0, Math.PI * 2),
     targetY: h / 2,
-    bias: rand(-6, 6),
+    bias: rand(-6, 6) * s,
     nextRetargetAt: 0
   };
 
   rightPaddle = {
-    x: w - 20 - 10,
-    y: 100 + Math.random() * 100,
-    w: 10,
-    h: 80,
-    vy: rand(-0.6, 0.6),
+    x: w - 15 * s - 8 * s,
+    y: (100 + Math.random() * 100) * s,
+    w: 8 * s,
+    h: 55 * s,
+    vy: rand(-0.6, 0.6) * s,
     phase: rand(0, Math.PI * 2),
     targetY: h / 2,
-    bias: rand(-6, 6),
+    bias: rand(-6, 6) * s,
     nextRetargetAt: 0
   };
 
@@ -424,7 +423,7 @@ function initPongGame() {
   forcedLose = false;
   loseStartTime = null;
 
-  const forcedLoseTime = (Math.random() * 10 + 10) * 1000;
+  const forcedLoseTime = (Math.random() * 5 + 5) * 1000;
   forcedLoseTimeout = setTimeout(() => {
     if (!matchOver && !userInteracted) {
       forcedLose = true;
@@ -438,8 +437,9 @@ function initPongGame() {
 
 function serveBall(dir) {
   const { w, h } = getCanvasCSSSize();
+  const s = pongScale();
 
-  const baseSpeed = rand(3.6, 4.4);
+  const baseSpeed = rand(3.6, 4.4) * s;
   const angle = rand(-0.32, 0.32);
 
   ball = {
@@ -447,9 +447,9 @@ function serveBall(dir) {
     y: h / 2,
     vx: Math.cos(angle) * baseSpeed * dir,
     vy: Math.sin(angle) * baseSpeed,
-    radius: 5,
+    radius: 5 * s,
     speed: baseSpeed,
-    maxSpeed: 6.3
+    maxSpeed: 6.3 * s
   };
 }
 
@@ -478,15 +478,16 @@ function resetMatch() {
   leftPaddle.targetY = h / 2 - leftPaddle.h / 2;
   rightPaddle.targetY = h / 2 - rightPaddle.h / 2;
 
-  leftPaddle.vy = rand(-0.4, 0.4);
-  rightPaddle.vy = rand(-0.4, 0.4);
+  const s = pongScale();
+  leftPaddle.vy = rand(-0.4, 0.4) * s;
+  rightPaddle.vy = rand(-0.4, 0.4) * s;
 
   serveBall(Math.random() < 0.5 ? 1 : -1);
 
   forcedLose = false;
   loseStartTime = null;
 
-  const forcedLoseTime = (Math.random() * 10 + 10) * 1000;
+  const forcedLoseTime = (Math.random() * 5 + 5) * 1000;
   forcedLoseTimeout = setTimeout(() => {
     if (!matchOver && !userInteracted) {
       forcedLose = true;
@@ -500,18 +501,19 @@ function retargetPaddle(p, isLeft, now) {
 
   const ballComing = isLeft ? ball.vx < 0 : ball.vx > 0;
 
-  let aimError = ballComing ? 10 : 16;
-  let idleAmp = 22;
+  const s = pongScale();
+  let aimError = (ballComing ? 18 : 25) * s;
+  let idleAmp = 28 * s;
   let idleFreq = 1.05;
 
   if (forcedLose && loseStartTime) {
     const elapsed = (performance.now() - loseStartTime) / 1000;
-    const degrade = clamp(elapsed / 5, 0, 1);
-    aimError += degrade * 26;
-    idleAmp += degrade * 14;
+    const degrade = clamp(elapsed / 3, 0, 1);
+    aimError += degrade * 35 * s;
+    idleAmp += degrade * 22 * s;
   }
 
-  const drift = rand(-1.2, 1.2);
+  const drift = rand(-2.0, 2.0) * s;
   p.bias = clamp(p.bias * 0.92 + drift, -aimError, aimError);
 
   let desired;
@@ -540,14 +542,15 @@ function moveOnePaddle(p, isLeft, dt, now) {
 
   const ballComing = isLeft ? ball.vx < 0 : ball.vx > 0;
 
-  let maxSpeed = ballComing ? 10.5 : 7.0;
+  const s = pongScale();
+  let maxSpeed = (ballComing ? 10.5 : 7.0) * s;
   let accel = ballComing ? 1.9 : 1.4;
   let damping = ballComing ? 0.90 : 0.86;
 
   if (forcedLose && loseStartTime) {
     const elapsed = (performance.now() - loseStartTime) / 1000;
-    const degrade = clamp(elapsed / 5, 0, 1);
-    maxSpeed -= degrade * 5.3;
+    const degrade = clamp(elapsed / 3, 0, 1);
+    maxSpeed -= degrade * 6.0 * s;
     accel -= degrade * 0.9;
   }
 
@@ -564,12 +567,18 @@ function moveOnePaddle(p, isLeft, dt, now) {
 }
 
 function movePaddles(dt, now) {
+  const { w } = getCanvasCSSSize();
+  const s = pongScale();
+  leftPaddle.x = 15 * s;
+  rightPaddle.x = w - 15 * s - rightPaddle.w;
+
   moveOnePaddle(leftPaddle, true, dt, now);
   moveOnePaddle(rightPaddle, false, dt, now);
 }
 
 function paddleBounce(paddle) {
   const { h } = getCanvasCSSSize();
+  const s = pongScale();
 
   const hitPos = (ball.y - (paddle.y + paddle.h / 2)) / (paddle.h / 2);
   const clampedHit = clamp(hitPos, -1, 1);
@@ -577,13 +586,11 @@ function paddleBounce(paddle) {
   const maxBounce = 0.90;
   const bounceAngle = clampedHit * maxBounce + rand(-0.05, 0.05);
 
-  ball.speed = clamp(ball.speed + 0.14, 3.1, ball.maxSpeed);
-
   const dir = paddle === leftPaddle ? 1 : -1;
   ball.vx = Math.cos(bounceAngle) * ball.speed * dir;
   ball.vy = Math.sin(bounceAngle) * ball.speed;
 
-  ball.vy += rand(-0.10, 0.10);
+  ball.vy += rand(-0.10, 0.10) * s;
   ball.y = clamp(ball.y, ball.radius, h - ball.radius);
 }
 
@@ -652,13 +659,15 @@ function draw() {
   ctx.fillStyle = "rgba(255,255,255,0.03)";
   for (let i = 0; i < h; i += 2) ctx.fillRect(0, i, w, 1);
 
+  const pongFont = Math.max(12, Math.round(22 * pongScale())) + "px Courier New";
+
   // Point announcement (only when match is not over)
   if (pointAnnounce && !matchOver) {
     ctx.fillStyle = "rgba(0,0,0,0.55)";
     ctx.fillRect(0, 0, w, h);
 
     ctx.fillStyle = "#ffffff";
-    ctx.font = "22px Courier New";
+    ctx.font = pongFont;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(pointAnnounceText, w / 2, h / 2);
@@ -670,7 +679,7 @@ function draw() {
     ctx.fillRect(0, 0, w, h);
 
     ctx.fillStyle = "#ffffff";
-    ctx.font = "22px Courier New";
+    ctx.font = pongFont;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(matchWinnerText, w / 2, h / 2);
