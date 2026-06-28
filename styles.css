@@ -416,7 +416,7 @@ body {
     justify-content: center;
     gap: 20px;
     z-index: 200;
-    opacity: 0; 
+    opacity: 0;
     transition: opacity 2s ease-in;
     pointer-events: none;
 }
@@ -436,7 +436,7 @@ body {
     color: #1a1a1a;
     font-weight: bold;
     text-transform: uppercase;
-    box-shadow: 
+    box-shadow:
         0 4px 5px rgba(0,0,0,0.5),
         inset 0 0 10px rgba(0,0,0,0.1);
     cursor: pointer;
@@ -601,13 +601,11 @@ body {
     word-break: break-word;
   }
 
-  /* Bottom control panel buttons */
   .control-panel {
     bottom: 18px;
     gap: 14px;
   }
 
-  /* Your elements are both .metal-button and .menu-item */
   .menu-item {
     width: auto;
     height: auto;
@@ -652,74 +650,97 @@ body {
   }
 }
 
-/* Mobile */
+/* Mobile — full-screen CRT, no border */
 @media (max-width: 600px) {
-  body {
-    padding: 10px;
+  html, body {
+    padding: 0;
+    overflow: hidden;
+    height: 100svh;
   }
 
   .crt-monitor {
-    width: 96vw;
-    height: auto;
-    aspect-ratio: 4 / 3;
-    max-height: 88svh;
-    border-width: 2.4vw;
-    border-radius: 10px;
+    width: 100vw;
+    height: 100svh;
+    max-width: none;
+    max-height: none;
+    aspect-ratio: auto;
+    border: none;
+    border-image: none;
+    border-radius: 0;
+    box-shadow: none;
   }
 
-  /* Tighten CRT overlay artifacts a bit */
+  .crt-screen {
+    border-radius: 0;
+  }
+
+  .new-screen {
+    border-radius: 0;
+    overflow: hidden;
+  }
+
+  .content-container {
+    overflow: hidden;
+  }
+
+  .ascii-art {
+    overflow: hidden;
+  }
+
   .crt-monitor::after {
     background-size: 100% 3px;
   }
 
   .crt-text {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .content-container {
-    margin-left: 10px;
-    margin-top: 10px;
+    margin: 8px 10px 0;
   }
 
   .ascii-art {
-    font-size: 12px;
+    font-size: 9px;
     line-height: 1.05;
     max-width: 100%;
-    overflow-x: auto;
+    overflow-x: hidden;
   }
 
   .info-set {
-    gap: 8px;
+    gap: 7px;
     margin-top: 10px;
   }
 
-  /* Stack label + typed content so it doesn't overflow */
   .info-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 6px;
+    gap: 3px;
   }
 
   .info-box {
     width: auto;
     min-width: 0;
-    padding: 5px 8px;
-    font-size: 0.82em;
+    padding: 3px 8px;
+    font-size: 0.72em;
+    border-width: 1px;
   }
 
   .typed-content {
-    font-size: 1.15rem;
+    font-size: 0.95rem;
     line-height: 1.2;
     max-width: 100%;
     word-break: break-word;
   }
 
-  /* Make the control panel usable on small screens */
+  /* CRT-themed buttons, bottom-left, behind scanline filter */
   .control-panel {
-    bottom: 14px;
-    gap: 10px;
-    padding: 0 10px;
-    flex-wrap: wrap;
+    bottom: 10px;
+    left: 10px;
+    width: auto;
+    justify-content: flex-start;
+    gap: 6px;
+    z-index: 8;
+    transition: opacity 0s;
   }
 
   .menu-item {
@@ -728,57 +749,99 @@ body {
   }
 
   .metal-button {
-    min-width: 120px;
-    padding: 10px 12px;
-    font-size: 1.05rem;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid #0aff0a;
+    border-top-color: #0aff0a;
+    border-left-color: #0aff0a;
+    padding: 4px 8px;
+    font-family: 'Roboto Mono', monospace;
+    color: #0aff0a;
+    font-weight: normal;
+    font-size: 0.72rem;
+    min-width: 0;
+    box-shadow: 0 0 4px rgba(0, 255, 0, 0.3);
+    text-shadow: 0 0 3px #0aff0a;
+    border-radius: 2px;
   }
 
-  /* Move HUD elements in so they don't collide with safe areas */
+  .metal-button:hover {
+    filter: none;
+    background: rgba(0, 255, 0, 0.1);
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+  }
+
+  .metal-button:active, .metal-button.active {
+    background: rgba(0, 255, 0, 0.2);
+    border-color: #0aff0a;
+    transform: none;
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+    color: #0aff0a;
+    text-shadow: 0 0 5px #0aff0a;
+  }
+
+  /* Scoreboard: centered, full size, matched glow to buttons */
   .pong-scoreboard {
-    top: 10px;
-    font-size: 0.95em;
-    padding: 5px 8px;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.85em;
+    padding: 4px 8px;
+    border-width: 1px;
+    box-shadow: 0 0 4px rgba(0, 255, 0, 0.3);
+    text-shadow: 0 0 3px #0aff0a;
   }
 
   .date-display {
-    bottom: 12px;
-    right: 12px;
-    font-size: 0.95em;
-    padding: 6px 8px;
+    bottom: 10px;
+    right: 10px;
+    font-size: 0.58em;
+    padding: 4px 8px;
+    border-width: 1px;
+    box-shadow: 0 0 4px rgba(0, 255, 0, 0.3);
+    text-shadow: 0 0 3px #0aff0a;
   }
 
   .back-to-pong {
-    bottom: 12px;
-    left: 12px;
-    font-size: 0.95em;
-    padding: 6px 8px;
+    bottom: 36px;
+    left: 10px;
+    font-size: 0.72em;
+    padding: 4px 8px;
+    border-width: 1px;
+    z-index: 8;
+    box-shadow: 0 0 4px rgba(0, 255, 0, 0.3);
+    text-shadow: 0 0 3px #0aff0a;
+    font-weight: normal;
+    font-family: 'Roboto Mono', monospace;
   }
 
-  /* Alerts: smaller and pushed down so they don't sit on top of scoreboard */
+  /* Alerts: narrow vertical column in top-right, clear of ALEXANDER */
   .alert-container {
-    top: 52px;
-    right: 10px;
-    gap: 6px;
+    top: 4px;
+    right: 4px;
+    flex-direction: column;
+    gap: 3px;
+    z-index: 8;
   }
 
   .alert-box {
-    width: 170px;
-    font-size: 0.78em;
-    padding: 8px;
+    width: 48px;
+    font-size: 0.42em;
+    padding: 3px;
+    border-width: 1px;
+    line-height: 1.2;
   }
 }
 
 /* Extra small phones */
 @media (max-width: 380px) {
   .ascii-art {
-    font-size: 11px;
+    font-size: 7.5px;
   }
   .metal-button {
-    min-width: 108px;
-    font-size: 0.98rem;
-    padding: 9px 10px;
+    font-size: 0.62rem;
+    padding: 3px 6px;
   }
   .alert-box {
-    width: 155px;
+    width: 90px;
   }
 }
